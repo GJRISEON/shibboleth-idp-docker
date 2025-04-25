@@ -5,6 +5,8 @@
 #
 . VERSIONS
 
+cp -f -r ./overlay/shibboleth-idp ./
+
 docker run --rm \
     -v `pwd`/shibboleth-idp:/opt/shibboleth-idp \
     -v `pwd`/fetched/shibboleth-dist:/data/shibboleth-dist \

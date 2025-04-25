@@ -46,11 +46,15 @@ ADD jetty-base-${JETTY_BASE_VERSION} ${JETTY_BASE}
 #
 # Add the Jetty distribution.
 #
-ADD jetty-dist/dist          ${JETTY_HOME}
+ADD jetty-dist/dist  ${JETTY_HOME}
 
 EXPOSE 80 443 8443
 
-VOLUME ["${IDP_HOME}"]
+
+COPY shibboleth-idp/ /opt/shibboleth-idp
+
+# Password 인증 모듈 활성화
+RUN /opt/shibboleth-idp/bin/module.sh -e idp.authn.Password
 
 WORKDIR ${JETTY_BASE}
 CMD ["java",\

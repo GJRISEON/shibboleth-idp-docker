@@ -11,10 +11,11 @@ TFPASS=changeit
 SEALPASS=changeit
 
 # Scope for the IdP
-SCOPE=iay.org.uk
+SCOPE=bitgaram.info
+
 
 # Host name for the container
-HOST=idp2.$SCOPE
+HOST=idp.$SCOPE
 
 # Entity ID for the identity provider
 ENTITYID=https://$HOST/idp/shibboleth
@@ -35,7 +36,6 @@ I=$DIST/idp.install.properties
 echo \# Properties controlling the installation of the Shibboleth IdP>$I
 # Uncomment the following to preserve the property files
 # echo idp.no.tidy=true>>$I
-
 #
 # Remove the system directory from the target if present. This is only necessary once, on
 # upgrade from v4.x.
@@ -61,3 +61,5 @@ $DIST/bin/install.sh \
     --sealerPassword $SEALPASS \
     --keystorePassword $TFPASS \
     --noPrompt
+
+echo "idp.loglevel.idp=DEBUG" >> $IDP_HOME/conf/idp.properties

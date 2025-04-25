@@ -7,8 +7,8 @@
 fetched/
 fetched-*/
 logs/
-shibboleth-idp/
-shibboleth-idp-*/
+# shibboleth-idp/
+# shibboleth-idp-*/
 saved-*/
 
 #
