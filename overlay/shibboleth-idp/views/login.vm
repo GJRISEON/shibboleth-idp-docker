@@ -1,0 +1,66 @@
+
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSS</title>
+    <link rel="stylesheet" href="$request.getContextPath()/css/default.css">
+    <link rel="stylesheet" href="$request.getContextPath()/css/common.css">
+    <link rel="stylesheet" href="$request.getContextPath()/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="$request.getContextPath()/js/scripts.js"></script>
+</head>
+
+<body>
+    <div class="wrap type3">
+        <h1 class="view_logo_mobile">
+            <img src="$request.getContextPath()/images/logo.png" alt="coss">
+        </h1>
+        <div class="loginbox">
+            #parse("login-error.vm")
+            <div class="visual">
+                <h1>
+                    <img src="$request.getContextPath()/images/logo.png" alt="coss">
+                </h1>
+            </div>
+            <form action="$flowExecutionUrl" method="post">
+		    #parse("csrf/csrf.vm")
+                <div class="formbox">
+                    <h2>
+                        <img src="$request.getContextPath()/images/logo3.png" alt="전주대학교">
+                    </h2>
+                    <h3>Login for Continue</h3>
+                    <div class="sign">
+                        <a href="javascript:;" class="active">Sign in</a>
+                    </div>
+                    <div class="inputbox id">
+                        <input type="id" id="username" name="j_username"  placeholder="ID" value="#if($username)$encoder.encodeForHTML($username)#end">
+                    </div>
+                    <div class="inputbox pw">
+                        <input type="password" id="password" name="j_password" placeholder="Password" value="">
+                        <a href="javascript:;" class="btn-hide hidepw">
+                        </a>
+                    </div>
+                    <div class="forgot">
+                        <label>
+                        <input type="checkbox" name="donotcache" value="1" id="donotcache" />
+                        사용자 아이디 기억하지 않기
+                        </label>
+                        <label>
+                        <input id="_shib_idp_revokeConsent" type="checkbox" name="_shib_idp_revokeConsent" value="true" />
+                        개인정보제공방식 초기화
+                        </label>
+                    </div>
+
+                    <button class="btn-login" type="submit" name="_eventId_proceed">#springMessageText("idp.login.login", "Login")
+                    </button>
+                </div>
+            </form>
+        </div>
+        <footer> Copyright © 실감미디어혁신융합대학. All right reserved. </footer>
+    </div>
+</body>
+</html>

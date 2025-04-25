@@ -50,13 +50,13 @@ ADD jetty-dist/dist  ${JETTY_HOME}
 
 EXPOSE 80 443 8443
 
-
 COPY shibboleth-idp/ /opt/shibboleth-idp
 
 # Password 인증 모듈 활성화
-RUN /opt/shibboleth-idp/bin/module.sh -e idp.authn.Password
+# RUN /opt/shibboleth-idp/bin/module.sh -e idp.authn.Password
 
 WORKDIR ${JETTY_BASE}
+# Jetty 로깅 모듈 활성화
 CMD ["java",\
     "-Djdk.tls.ephemeralDHKeySize=2048", \
     "-Didp.home=/opt/shibboleth-idp", \
@@ -64,12 +64,8 @@ CMD ["java",\
     "-Djetty.logs=/opt/jetty-base/logs",\
     "-jar", "/opt/jetty/start.jar"]
 
-#
-# Add Jetty configuration overlay from a tar archive.
-#
 ADD overlay/jetty-base-${JETTY_BASE_VERSION}.tar ${JETTY_BASE}
 
-#
 # Health check for the container.
 #
 # -f == --fail        don't show message on server failures

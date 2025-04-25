@@ -15,6 +15,7 @@ saved-*/
 # documentation.
 overlay/*
 !overlay/*.md
+!overlay/shibboleth-idp
 
 #
 # End.
