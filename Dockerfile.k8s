@@ -1,0 +1,76 @@
+#
+# Shibboleth Identity Provider for Kubernetes
+#
+# 기존 Dockerfile과 유사하지만 Shibboleth IdP 설정을 이미지에 포함
+#
+
+ARG JAVA_VERSION=amazoncorretto:17
+FROM ${JAVA_VERSION}
+
+LABEL org.opencontainers.image.authors="RYU. G.S. <narzis@gmail.com>"
+LABEL org.opencontainers.image.description="Shibboleth IdP for Kubernetes"
+
+# Jetty 설정
+ENV JETTY_HOME=/opt/jetty
+ENV JETTY_BASE=/opt/jetty-base
+ENV JETTY_LOGS=${JETTY_BASE}/logs
+ENV IDP_HOME=/opt/shibboleth-idp
+
+# Shibboleth 설치 관련 환경 변수 설정
+ENV DIST=/opt/shibboleth-dist
+ENV SCOPE=bitgaram.info
+ENV ENTITYID=https://idp.bitgaram.info/idp/shibboleth
+ENV HOST=idp.bitgaram.info
+ENV SEALPASS=changeit
+ENV TFPASS=changeit
+
+# Jetty 로그 디렉토리는 볼륨으로 유지 
+VOLUME ["${JETTY_LOGS}"]
+
+# Jetty base 추가
+ARG JETTY_BASE_VERSION
+ADD jetty-base-${JETTY_BASE_VERSION} ${JETTY_BASE}
+
+# Jetty 배포판 추가
+ADD jetty-dist/dist ${JETTY_HOME}
+
+# 중요: Shibboleth IdP 디렉토리 복사 (볼륨으로 선언하지 않음)
+COPY shibboleth-idp/ ${IDP_HOME}/
+
+
+# Shibboleth 배포판 복사 (설치 스크립트 포함)
+COPY fetched/shibboleth-dist/ ${DIST}/
+
+# REST 인증 JAR 파일 복사 및 배치
+COPY overlay/shibboleth-idp-custom/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/edit-webapp/WEB-INF/lib/ 
+
+# 포트 노출
+EXPOSE 80 443 8443
+
+WORKDIR ${JETTY_BASE}
+
+RUN $DIST/bin/install.sh \
+    --targetDir $IDP_HOME \
+    --scope $SCOPE \
+    --entityID $ENTITYID \
+    --hostName $HOST \
+    --sealerPassword $SEALPASS \
+    --keystorePassword $TFPASS \
+    --noPrompt \
+    && mkdir -p ${IDP_HOME}/dist/webapp/WEB-INF/lib/ \
+    && cp ${IDP_HOME}/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/dist/webapp/WEB-INF/lib/
+
+# Jetty 로깅 모듈 활성화
+CMD ["java",\
+    "-Djdk.tls.ephemeralDHKeySize=2048", \
+    "-Didp.home=/opt/shibboleth-idp", \
+    "-Djetty.base=/opt/jetty-base",\
+    "-Djetty.logs=/opt/jetty-base/logs",\
+    "-jar", "/opt/jetty/start.jar"]
+
+# 오버레이 추가
+ADD overlay/jetty-base-${JETTY_BASE_VERSION}.tar ${JETTY_BASE}
+
+# 헬스체크
+HEALTHCHECK --interval=1m --timeout=30s \
+    CMD curl -f -s http://127.0.0.1/idp/status || exit 1

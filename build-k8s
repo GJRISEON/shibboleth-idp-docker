@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#
+# Kubernetes용 컨테이너 이미지를 빌드합니다.
+#
+
+. VERSIONS
+
+TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+
+# 이미지 태그 설정
+K8S_IMAGE_NAME="docker.iugj.ac.kr/gjriseon-idp"
+K8S_IMAGE_WITH_TAG="${K8S_IMAGE_NAME}:${TIMESTAMP}"
+
+# 먼저 Shibboleth IdP 설치 확인
+if [ ! -d "./shibboleth-idp" ] || [ ! -f "./shibboleth-idp/conf/idp.properties" ]; then
+    echo "ERROR: shibboleth-idp directory is missing or incomplete."
+    echo "Please run './install' first to set up the IdP before building the k8s image."
+    exit 1
+fi
+
+# idp.properties 설정 확인
+if grep -q "idp.entityID=https://idp.example.org" "./shibboleth-idp/conf/idp.properties"; then
+    echo "WARNING: Default entityID detected in idp.properties."
+    echo "Make sure the IdP is properly configured before building the image."
+    echo "Continue anyway? (y/n)"
+    read answer
+    if [ "$answer" != "y" ]; then
+        exit 1
+    fi
+fi
+
+cp -f -r ./overlay/shibboleth-idp-custom/* ./shibboleth-idp
+
+# Kubernetes용 이미지 빌드
+echo "Building Kubernetes-ready Shibboleth IdP image: ${K8S_IMAGE_WITH_TAG}"
+docker build \
+    --build-arg JAVA_VERSION=$JAVA_VERSION \
+    --build-arg JETTY_BASE_VERSION=$JETTY_BASE_VERSION \
+    -f Dockerfile.k8s \
+    $@ -t ${K8S_IMAGE_NAME} .
+
+echo "Kubernetes image build complete: ${K8S_IMAGE_NAME_WITH_TAG}"
+echo "This image contains a complete Shibboleth IdP installation."

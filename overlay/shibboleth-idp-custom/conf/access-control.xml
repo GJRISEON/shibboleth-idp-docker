@@ -29,40 +29,16 @@
     <util:map id="shibboleth.AccessControlPolicies">
         <entry key="AccessByIPAddress">
             <bean id="AccessByIPAddress" parent="shibboleth.IPRangeAccessControl"
-                p:allowedRanges="#{ {'10.41.221.67/32','127.0.0.1/32','168.131.19.254/32','::1/128'} }" />
+                p:allowedRanges="#{ {'10.0.0.0/16','127.0.0.1/32','168.131.19.254/32','168.131.17.0/24','::1/128'} }" />
         </entry>
+        
+        <!-- If you want to keep a separate policy for status specifically -->
         <entry key="status.AccessByIPAddress">
-            <bean id="status.AccessByIPAddress" parent="shibboleth.IPRangeAccessControl"
-                p:allowedRanges="#{ {'10.41.221.67/32','127.0.0.1/32','168.131.19.254/32','::1/128'} }" />
+            <bean parent="shibboleth.IPRangeAccessControl"
+                p:allowedRanges="#{ {'10.0.0.0/16','127.0.0.1/32','::1/128','168.131.17.0/24'} }" />
         </entry>
-       <!-- <entry key="AccessByUser">
-            <bean parent="shibboleth.PredicateAccessControl">
-                <constructor-arg>
-                    <bean parent="shibboleth.Conditions.SubjectName" c:collection="#{'jdoe'}" />
-                </constructor-arg>
-            </bean>
-        </entry>--> 
-
-        <!--
-        <entry key="AccessByAttribute">
-            <bean parent="shibboleth.PredicateAccessControl">
-                <constructor-arg>
-                    <bean class="net.shibboleth.idp.profile.logic.SimpleAttributePredicate">
-                        <property name="attributeValueMap">
-                            <map>
-                                <entry key="eduPersonEntitlement">
-                                    <list>
-                                        <value>https://example.org/entitlement/idpadmin</value>
-                                    </list>
-                                </entry>
-                            </map>
-                        </property>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </entry>
-        -->
-
+        
+        <!-- Other policies... -->
     </util:map>
 
 </beans>

@@ -50,10 +50,11 @@ ADD jetty-dist/dist  ${JETTY_HOME}
 
 EXPOSE 80 443 8443
 
-COPY shibboleth-idp/ /opt/shibboleth-idp
-
+VOLUME ["${IDP_HOME}"]
 # Password 인증 모듈 활성화
 # RUN /opt/shibboleth-idp/bin/module.sh -e idp.authn.Password
+
+
 
 WORKDIR ${JETTY_BASE}
 # Jetty 로깅 모듈 활성화

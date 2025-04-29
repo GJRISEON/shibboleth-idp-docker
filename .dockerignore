@@ -4,8 +4,8 @@
 #
 
 .git
-fetched/
-fetched-*/
+#fetched/
+#fetched-*/
 logs/
 # shibboleth-idp/
 # shibboleth-idp-*/
@@ -16,6 +16,7 @@ saved-*/
 #
 overlay/*
 !overlay/*.tar
+!overlay/shibboleth-idp-custom/
 
 #
 # End.

@@ -2,7 +2,6 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:p="http://www.springframework.org/schema/p"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -11,10 +10,11 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
     
-    <!-- 사용자 정의 REST 인증 모듈 -->
+    <!-- 사용자 정의 REST 인증 모듈 - 클래스 내부에 URL이 하드코딩되어 있음 -->
     <bean id="ValidateUsernamePasswordAgainstRest" 
           class="com.bitgaram.shibboleth.idp.authn.impl.ValidateUsernamePasswordAgainstRest" 
-          scope="prototype" />
+          scope="prototype"
+          />
     
     <!-- Shibboleth IdP 5에서는 명시적으로 Validators 목록에 추가해야 함 -->
     <util:list id="shibboleth.authn.Password.Validators">

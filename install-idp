@@ -52,8 +52,6 @@ rm -rf $IDP_HOME/system
 # tree. The start.d from this tree will be in start.d.dist, while
 # the old start.d from a previous install will be retained.
 #
-echo $SEALPASS
-echo $TFPASS
 
 $DIST/bin/install.sh \
     --propertyFile idp.install.properties \
@@ -64,3 +62,5 @@ $DIST/bin/install.sh \
     --sealerPassword $SEALPASS \
     --keystorePassword $TFPASS \
     --noPrompt
+
+# echo "idp.webflow.locations = %{idp.home}/conf/webflow/webflow-config.xml" >> /opt/shibboleth-idp/conf/idp.properties
