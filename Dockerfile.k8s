@@ -7,6 +7,9 @@
 ARG JAVA_VERSION=amazoncorretto:17
 FROM ${JAVA_VERSION}
 
+# 필요한 패키지 설치 (tar 포함)
+RUN yum install -y tar gzip wget
+
 LABEL org.opencontainers.image.authors="RYU. G.S. <narzis@gmail.com>"
 LABEL org.opencontainers.image.description="Shibboleth IdP for Kubernetes"
 
@@ -37,7 +40,6 @@ ADD jetty-dist/dist ${JETTY_HOME}
 # 중요: Shibboleth IdP 디렉토리 복사 (볼륨으로 선언하지 않음)
 COPY shibboleth-idp/ ${IDP_HOME}/
 
-
 # Shibboleth 배포판 복사 (설치 스크립트 포함)
 COPY fetched/shibboleth-dist/ ${DIST}/
 
@@ -59,6 +61,20 @@ RUN $DIST/bin/install.sh \
     --noPrompt \
     && mkdir -p ${IDP_HOME}/dist/webapp/WEB-INF/lib/ \
     && cp ${IDP_HOME}/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/dist/webapp/WEB-INF/lib/
+
+# Nashorn 플러그인 수동 설치 - 다운로드 후 직접 파일 배치
+RUN cd /tmp && \
+    curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/scripting/2.0.0/idp-plugin-nashorn-jdk-dist-2.0.0.tar.gz -o nashorn-plugin.tar.gz && \
+    mkdir -p nashorn-extract && \
+    tar -xf nashorn-plugin.tar.gz -C nashorn-extract && \
+    cd nashorn-extract && \
+    find . -type f -name "*.jar" -exec cp {} ${IDP_HOME}/edit-webapp/WEB-INF/lib/ \; && \
+    find . -path "*/flows/*" -type d -exec cp -r {} ${IDP_HOME}/flows/ \; && \
+    find . -path "*/conf/*" -type f -exec cp {} ${IDP_HOME}/conf/ \; && \
+    cd ${IDP_HOME} && \
+    ./bin/build.sh && \
+    cd /tmp && \
+    rm -rf nashorn-extract nashorn-plugin.tar.gz
 
 # Jetty 로깅 모듈 활성화
 CMD ["java",\

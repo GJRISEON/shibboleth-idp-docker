@@ -7,7 +7,7 @@
     xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd
                       urn:mace:shibboleth:2.0:security http://shibboleth.net/schema/idp/shibboleth-security.xsd">
 
-    <DataConnector propagateResolutionExceptions="true" acceptTypes="application/json" id="rest" xsi:type="HTTP" httpClientRef="shibboleth.NonCachingHttpClient">
+    <DataConnector propagateResolutionExceptions="false" acceptTypes="application/json" id="rest" xsi:type="HTTP" httpClientRef="WebServiceHttpClient">
         <URLTemplate>
             <![CDATA[
                 http://rest:4000/attributes/$pathEscaper.escape($resolutionContext.principal)
@@ -17,47 +17,76 @@
         <ResponseMapping>
             <Script>
                 <![CDATA[
+        // Java 클래스 임포트
         var HashSet = Java.type("java.util.HashSet");
-        var HttpClientSupport = Java.type("net.shibboleth.utilities.java.support.httpclient.HttpClientSupport");
+        var ArrayList = Java.type("java.util.ArrayList");
+        var HttpClientSupport = Java.type("net.shibboleth.shared.httpclient.HttpClientSupport");
         var logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
         var IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
         var StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
         var EmptyAttributeValue = Java.type("net.shibboleth.idp.attribute.EmptyAttributeValue");
-        var EmptyType = Java.type("net.shibboleth.idp.attribute.EmptyAttributeValue.EmptyType");
-
-        function isEmpty(obj) {
-          for(var prop in obj) {
-            if(obj.hasOwnProperty(prop)) {
-              return false;
-            }
-          }
-          return JSON.stringify(obj) === JSON.stringify({});
-        }
-
-        logger.info("===shibboleth attribute resolver===");
-        // Limits length to 64k
+        
+        // HTTP 응답 본문 읽기
+        logger.info("=== Shibboleth Attribute Resolver ===");
         var body = HttpClientSupport.toString(response.getEntity(), "UTF-8", 65536);
-        logger.info(body);
-        var result = JSON.parse(body);
-	
-	Object.keys(result).forEach(function (att){
-
-        logger.info(att);
-	    var values = new HashSet();
-	    var idpAtt =  new IdPAttribute(att);
-            if (!isEmpty(result[att][0])) {
-	        result[att].forEach(function(val){
-	    	    logger.info("val : " + val);
-                    values.add(new StringAttributeValue(val));
-	        });
-            } else {
-                values.add(new EmptyAttributeValue(EmptyAttributeValue.EmptyType.NULL_VALUE));
+        logger.info("Response body: " + body);
+        
+        try {
+            // JSON 파싱
+            var resultObj = JSON.parse(body);
+            
+            // 모든 속성 처리
+            var keys = Object.keys(resultObj);
+            for (var i = 0; i < keys.length; i++) {
+                var attName = keys[i];
+                logger.info("Processing attribute: " + attName);
+                
+                // IdPAttribute 생성
+                var idpAttribute = new IdPAttribute(attName);
+                
+                // StringAttributeValue 객체 컬렉션 생성
+                var attributeValues = new ArrayList();
+                
+                // 속성 값 가져오기
+                var valuesArray = resultObj[attName];
+                
+                // 배열인 경우 모든 요소 처리
+                if (Object.prototype.toString.call(valuesArray) === '[object Array]') {
+                    logger.info(attName + " is an array with " + valuesArray.length + " items");
+                    
+                    for (var j = 0; j < valuesArray.length; j++) {
+                        var value = valuesArray[j];
+                        if (value !== null && value !== undefined && value !== "") {
+                            logger.info("Adding value: " + value);
+                            attributeValues.add(new StringAttributeValue(String(value)));
+                        }
+                    }
+                } else {
+                    // 단일 값인 경우
+                    logger.info(attName + " is a single value");
+                    if (valuesArray !== null && valuesArray !== undefined && valuesArray !== "") {
+                        logger.info("Adding value: " + valuesArray);
+                        attributeValues.add(new StringAttributeValue(String(valuesArray)));
+                    }
+                }
+                
+                // 값이 없으면 NULL_VALUE 추가
+                if (attributeValues.isEmpty()) {
+                    logger.info("No values found for " + attName + ", adding NULL_VALUE");
+                    attributeValues.add(new EmptyAttributeValue(EmptyAttributeValue.EmptyType.NULL_VALUE));
+                }
+                
+                // 값 설정 및 결과에 추가
+                idpAttribute.setValues(attributeValues);
+                connectorResults.add(idpAttribute);
+                logger.info("Added attribute: " + attName + " with " + attributeValues.size() + " values");
             }
-	    idpAtt.setValues(values);
-            connectorResults.add(idpAtt);
-	});
-        logger.info(connectorResults);
-	
+            
+        } catch (e) {
+            logger.error("Error processing attributes: " + e);
+            logger.error("Stack trace: " + e.stack);
+            throw e;
+        }
         ]]>
             </Script>
         </ResponseMapping>
@@ -91,7 +120,7 @@
     </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="eduPersonPrincipalName">
-        <InputDataConnector ref="rest"  attributeNames="eduPersonPrincipalName"/>
+        <InputDataConnector ref="rest"  attributeNames="eppn"/>
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.6" friendlyName="eduPersonPrincipalName" encodeType="false" />
     </AttributeDefinition>
 
@@ -134,4 +163,3 @@
   </AttributeDefinition>
 -->
 </AttributeResolver>
-
