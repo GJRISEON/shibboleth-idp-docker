@@ -40,8 +40,11 @@ ADD jetty-dist/dist ${JETTY_HOME}
 # 중요: Shibboleth IdP 디렉토리 복사 (볼륨으로 선언하지 않음)
 COPY shibboleth-idp/ ${IDP_HOME}/
 
+COPY overlay/shibboleth-idp-custom/ ${IDP_HOME}/
+
 # Shibboleth 배포판 복사 (설치 스크립트 포함)
 COPY fetched/shibboleth-dist/ ${DIST}/
+
 
 # REST 인증 JAR 파일 복사 및 배치
 COPY overlay/shibboleth-idp-custom/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/edit-webapp/WEB-INF/lib/ 

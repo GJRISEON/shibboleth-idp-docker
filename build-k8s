@@ -19,18 +19,6 @@ if [ ! -d "./shibboleth-idp" ] || [ ! -f "./shibboleth-idp/conf/idp.properties" 
     exit 1
 fi
 
-# idp.properties 설정 확인
-if grep -q "idp.entityID=https://idp.example.org" "./shibboleth-idp/conf/idp.properties"; then
-    echo "WARNING: Default entityID detected in idp.properties."
-    echo "Make sure the IdP is properly configured before building the image."
-    echo "Continue anyway? (y/n)"
-    read answer
-    if [ "$answer" != "y" ]; then
-        exit 1
-    fi
-fi
-
-cp -f -r ./overlay/shibboleth-idp-custom/* ./shibboleth-idp
 
 # Kubernetes용 이미지 빌드
 echo "Building Kubernetes-ready Shibboleth IdP image: ${K8S_IMAGE_WITH_TAG}"
