@@ -9,7 +9,7 @@
 TIMESTAMP=$(date +"%Y%m%d%H%M%S")
 
 # 이미지 태그 설정
-K8S_IMAGE_NAME="docker.iugj.ac.kr/gjriseon-idp"
+K8S_IMAGE_NAME="registry.bitgaram.info/gjriseon-idp"
 K8S_IMAGE_WITH_TAG="${K8S_IMAGE_NAME}:${TIMESTAMP}"
 
 # 먼저 Shibboleth IdP 설치 확인
@@ -19,6 +19,10 @@ if [ ! -d "./shibboleth-idp" ] || [ ! -f "./shibboleth-idp/conf/idp.properties" 
     exit 1
 fi
 
+# Fix permission issues with credentials
+if [ -f "./fetched/shibboleth-dist/credentials/idp-userfacing.p12" ]; then
+    sudo chmod 644 ./fetched/shibboleth-dist/credentials/idp-userfacing.p12
+fi
 
 # Kubernetes용 이미지 빌드
 echo "Building Kubernetes-ready Shibboleth IdP image: ${K8S_IMAGE_WITH_TAG}"
@@ -26,7 +30,14 @@ docker build \
     --build-arg JAVA_VERSION=$JAVA_VERSION \
     --build-arg JETTY_BASE_VERSION=$JETTY_BASE_VERSION \
     -f Dockerfile.k8s \
-    $@ -t ${K8S_IMAGE_NAME} .
+    $@ -t ${K8S_IMAGE_WITH_TAG} .
 
-echo "Kubernetes image build complete: ${K8S_IMAGE_NAME_WITH_TAG}"
-echo "This image contains a complete Shibboleth IdP installation."
+# Tag with latest as well
+# docker tag ${K8S_IMAGE_WITH_TAG} ${K8S_IMAGE_NAME}:latest
+
+# echo "Kubernetes image build complete: ${K8S_IMAGE_WITH_TAG}"
+# echo "This image contains a complete Shibboleth IdP installation."
+docker push registry.bitgaram.info/gjriseon-idp:latest && kubectl delete deployment gjriseon-idp && kubectl apply -f ~/k8s/gjriseon-idp-deployment.yaml
+# # Push both tags
+
+# sudo rm -rf shibboleth-idp; ./build; ./install; sudo ./build-k8s; k rollout restart deployment gjriseon-idp

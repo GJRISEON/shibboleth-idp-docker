@@ -50,10 +50,10 @@
      <MetadataProvider id="LMS_SP" xsi:type="FilesystemMetadataProvider" metadataFile="%{idp.home}/metadata/lms-sp-metadata.xml"/> 
 -->
     <MetadataProvider 
-	    id="iugj-federation" 
+	    id="jst-federation" 
 	    xsi:type="FileBackedHTTPMetadataProvider" 
-	    backingFile="%{idp.home}/metadata/iugj-federation.xml" 
-	    metadataURL="https://registry.iugj.ac.kr/rr3/metadata/federation/iu-gj/SP/metadata.xml"
+	    backingFile="%{idp.home}/metadata/jst-federation.xml" 
+	    metadataURL="https://registry.jst.ac.kr/rr3/metadata/federation/gjriseon/SP/metadata.xml"
 	    initializeFromBackupFile="true"
 	    >
     </MetadataProvider>
