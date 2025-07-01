@@ -19,3 +19,5 @@ overlay/*
 #
 # End.
 #
+idp.log
+sp.log

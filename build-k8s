@@ -33,11 +33,12 @@ docker build \
     $@ -t ${K8S_IMAGE_WITH_TAG} .
 
 # Tag with latest as well
-# docker tag ${K8S_IMAGE_WITH_TAG} ${K8S_IMAGE_NAME}:latest
+docker tag ${K8S_IMAGE_WITH_TAG} ${K8S_IMAGE_NAME}:latest
 
 # echo "Kubernetes image build complete: ${K8S_IMAGE_WITH_TAG}"
 # echo "This image contains a complete Shibboleth IdP installation."
-docker push registry.bitgaram.info/gjriseon-idp:latest && kubectl delete deployment gjriseon-idp && kubectl apply -f ~/k8s/gjriseon-idp-deployment.yaml
+docker push registry.bitgaram.info/gjriseon-idp:latest 
+# && kubectl delete deployment gjriseon-idp && kubectl apply -f ~/k8s/gjriseon-idp-deployment.yaml
 # # Push both tags
 
 # sudo rm -rf shibboleth-idp; ./build; ./install; sudo ./build-k8s; k rollout restart deployment gjriseon-idp

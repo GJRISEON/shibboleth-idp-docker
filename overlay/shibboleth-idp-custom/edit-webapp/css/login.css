@@ -1,140 +1,100 @@
-.login {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 767px;
-  margin: 0 auto;
-  padding: 200px 0 150px;
-}
-.img_visual {
-  position: relative;
-  top: -110px;
+@charset "UTF-8";
+
+body {height: 100vh;}
+/* 엣지 비밀번호 보이기/숨기기 기본기능 제거 */
+input::-ms-reveal,
+input::-ms-clear {
+    display : none;
 }
 
-.img_bg_circle {
-  position: absolute;
-  top: -80%;
-  left: -80%;
-  z-index: -1;
-}
+/* login sian2 */
+.view_logo_mobile {display: none;}
+.wrap {background-color: #e6f2ff; width: 100%; min-height: 100vh; position: relative;}
+.wrap .loginbox .visual {width: 40%; background-color: transparent; background: url('../images/login-visual01.svg') no-repeat -10px; background-size: cover; align-items: flex-start; justify-content: flex-start; padding: 40px; position: relative;}
+.wrap .loginbox .visual::before {content: ''; display: block; width: 420px; height: 420px; background: url('../images/login-visual02.svg') no-repeat center center; background-size: 100%; position: absolute; bottom: -30px; right: 40px;}
+.wrap .loginbox .visual h1 {color: #fff; font-size: 35px; font-weight: bold; text-shadow: 1px 4px 7px rgba(64,108,159,.5); word-break: keep-all;}
 
-.visual {
-  position: relative;
-  width: calc(100% - 270px);
-  -webkit-width: calc(100% - 270px);
-}
+.wrap .loginbox {max-width: 1400px; width: 90%; height: 650px; background: linear-gradient(to right, #1b63f3, #3d94fb); box-shadow: 0 0 10px rgba(0,0,0,.12); border-radius: 20px; display: flex; position: absolute; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden;}
+.wrap .loginbox form {width: 60%; background-color: #fff; border-radius: 20px 0 0 20px; box-shadow: -10px 0 10px rgba(0,0,0,.1); padding: 100px 125px 50px 125px; position: relative; display: flex; align-items: center; justify-content: center;}
+.wrap .loginbox form .formbox {width: 100%;}
+.wrap .loginbox form .formbox h2 {width: fit-content; height: fit-content; position: absolute; top: 40px; right: 40px; display: flex; justify-content: center; align-items: center;}
+.wrap .loginbox form .formbox .rise-logo {display: none; font-weight: bold; font-size: 35px;}
+.wrap .loginbox form .formbox h2 img {height: 38px;}
+.wrap .loginbox form .formbox .forgot {display: flex; flex-direction: column; font-size: 16px;}
+.wrap .loginbox form .formbox .forgot button {width: 100%; height: 54px; border-radius: 10px; background: #0b57d0; font-size: 20px; color: #fff; margin: 20px 0; box-shadow: 0 8px 21px rgba(0,0,0,0.16);}
+.wrap label input[type="checkbox"] {position: absolute; opacity: 0; width: 0; height: 0;}
+.wrap label {width: fit-content; position: relative; padding-left: 25px; cursor: pointer; user-select: none; color: #1f1f1f;}
+.wrap label .check-icon {position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border: 1px solid #ddd; border-radius: 3px; background: #fff; font-family: 'bootstrap-icons'; display: flex; align-items: center; justify-content: center;}
+.wrap label input[type="checkbox"]:checked + .check-icon {background-color: #0b57d0; border-color: #0b57d0;}
+.wrap label input[type="checkbox"]:checked + .check-icon::before {font-family: "bootstrap-icons"; color: white; content: "\F633"; font-size: 13px;}
 
-.formbox {
-  width: 270px;
-}
+.wrap .loginbox form .formbox .txt-box {display: flex; align-items: center; text-align: center; color: #1f1f1f; font-weight: bold;  margin-bottom: 35px;}
+.wrap .loginbox form .formbox .txt-box::before,
+.wrap .loginbox form .formbox .txt-box::after {content: ''; flex: 1; height: 1px; background: #747775;}
+.wrap .loginbox form .formbox .txt-box::after {margin-left: 25px;}
+.wrap .loginbox form .formbox .txt-box::before {margin-right: 25px;}
+.wrap .loginbox form .formbox h3 { text-align: center; font-weight: bold; position: relative; font-size: 25px;}
+.wrap .loginbox form .formbox .sign {margin-bottom: 35px;}
+.wrap .loginbox form .formbox .sign a {color: #1f1f1f; font-size: 25px; cursor: auto;}
+.wrap .loginbox form .formbox .sign a strong{color: #1f1f1f;}
+.wrap .loginbox form .formbox .inputbox {position: relative; height: 54px; margin-bottom: 20px;}
+.wrap .loginbox form .formbox .inputbox input {width: 100%; height: 54px; background-color: #fff; border-radius: 10px; border: 1px solid #747775; box-shadow: none; padding: 0 20px; font-size: 17px; position: relative;}
+.wrap .loginbox form .formbox .inputbox input:focus {background-color: #fff; outline: none; border: 2px solid #0b57d0; transition: border-color 0.2s ease-in-out;}
+.wrap .loginbox form .formbox .inputbox label { color: #666; background-color: #fff; padding: 0 10px; position: absolute; top: 50%; left: 10px; transform: translateY(-50%); pointer-events: none; transition: all 0.2s ease-in-out;}
+.wrap .loginbox form .formbox .inputbox input:focus + label,
+.wrap .loginbox form .formbox .inputbox input:not(:placeholder-shown) + label { top: 0px; font-size: 17px; color: #0b57d0;}
+.wrap .toggle-pw {position: absolute; top:50%; right: 20px; transform: translateY(-50%); cursor: pointer; display: none; font-size: 22px;}
 
-.img_logo_university {
-  width: 100%;
-}
+.wrap footer {width: 100%; position: absolute; bottom: 3%; left: 0; font-size: 15px; text-align: center; color: #666;}
 
-.formTitle {
-  font-size: 24px;
-  color: #fff;
-  width: 100%;
-  height: 40px;
-  line-height: 40px;
-  letter-spacing: -1px;
-  text-align: center;
-  background: #ef9628;
+@media (max-width:1400px){
+    .wrap .loginbox {max-width: 1280px;}
+    .wrap .loginbox form {width: 64%; padding: 100px 95px 50px 95px; }
+    .wrap .loginbox .visual h1 {font-size: 32px;}
+    .wrap .loginbox .visual {background-position: -50px 0;}
+    .wrap .loginbox .visual::before {width: 350px; height: 350px; bottom: -20px; right: 40px;}
 }
-
-.labelinput {
-  height: 50px;
-  border-radius: 5px;
-  background: #d9d9d9;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding-left: 20px;
+@media (max-width:1200px){
+    .wrap .loginbox .visual {background-position: -100px 0;}
+        .wrap .loginbox .visual::before {width: 320px; height: 320px; bottom: -30px; right: 30px;}
 }
-.labelinput input {
-  height: 40px;
-  margin-left: 10px;
-  background: none;
-  border: none;
-  font-size: 15px;
+@media (max-width:1024px){
+    .wrap .loginbox {background: none;}
+    .wrap .loginbox .visual {display: none;}
+    .wrap .loginbox form {width: 100%; padding: 0 80px;}
+    .wrap .loginbox form .formbox .rise-logo {display: block;}
+    .wrap .loginbox form .formbox h2 {width: 100%; gap: 20px; position: static; margin-bottom: 50px;}
+    .wrap .loginbox form .formbox h2 .rise-logo {font-size: 38px;}
+    .wrap .loginbox form .formbox h2 img {height: 43px;}
 }
-.labelinput input:focus {
-  outline: 0;
+@media (max-width:650px){
+    .wrap .loginbox {height: 600px;}
+    .wrap .loginbox form {width: 100%; padding: 0 60px;}
+    .wrap .loginbox form .formbox h2 .rise-logo {font-size: 32px;}
+    .wrap .loginbox form .formbox h2 img {height: 37px;}
+    .wrap .loginbox form .formbox .txt-box h3 {font-size: 22px;}
+    .wrap .loginbox form .formbox .sign a {font-size: 20px;}
 }
-
-.labelcheck {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  margin: 15px 0;
+@media (max-width:500px){
+    .wrap .loginbox {height: 500px;}
+    .wrap .loginbox form {width: 100%; padding: 0 40px;}
+    .wrap .loginbox form .formbox h2 {gap: 10px; margin-bottom: 35px;}
+    .wrap .loginbox form .formbox h2 .rise-logo {font-size: 25px;}
+    .wrap .loginbox form .formbox h2 img {height: 30px;}
+    .wrap .loginbox form .formbox .txt-box h3 {font-size: 18px;}
+    .wrap .loginbox form .formbox .sign {display: none;}
+    .wrap .loginbox form .formbox .inputbox {height: 44px;}
+    .wrap .loginbox form .formbox .inputbox input {height: 44px;}
+    .wrap .loginbox form .formbox .forgot button {height: 44px; font-size: 18px;}
+    .wrap .loginbox form .formbox .inputbox input {font-size: 14px;}
+    .wrap .loginbox form .formbox .inputbox input:focus + label,
+    .wrap .loginbox form .formbox .inputbox input:not(:placeholder-shown) + label {font-size: 14px;}
+    .wrap .loginbox form .formbox .inputbox label {font-size: 16px;}
+    .wrap .toggle-pw {font-size: 18px;}
+    .wrap label .check-icon {width: 15px; height: 15px;}
+    .wrap label input[type="checkbox"]:checked + .check-icon::before {font-size: 12px;}
+    .wrap label {font-size: 14px; padding-left: 20px;}
 }
-
-.labelcheck input {
-  position: relative;
-  top: 2px;
-  margin-right: 5px;
-}
-
-.labelcheck span {
-  color: #bababa;
-  line-height: 18px;
-}
-
-.btn_submit {
-  font-size: 16px;
-  font-weight: bold;
-  color: #fff;
-  background: #ef9628;
-  display: block;
-  height: 50px;
-  width: 100%;
-  outline: 0;
-  border: 0;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.btn_submit:hover {
-  background: #f18500;
-}
-
-.btn_find_pw {
-  text-align: center;
-  text-decoration: none;
-  display: block;
-  color: #bababa;
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-.btn_find_pw:hover {
-  color: #999;
-}
-
-.img_logo_pc {
-  display: inline-block;
-}
-
-@media screen and (max-width: 767px) {
-  .login {
-    display: block;
-    padding: 50px 15px;
-  }
-  .img_logo_pc {
-    display: none;
-  }
-  .img_logo_mobile {
-    display: block;
-  }
-  .img_visual {
-    right: -30px;
-  }
-  .img_bg_circle {
-    top: -400px;
-    left: -400px;
-  }
-  .formbox {
-    margin: 0 auto;
-  }
+@media (max-width:400px){
+    .wrap .loginbox form .formbox h2 {flex-direction: column;}
 }

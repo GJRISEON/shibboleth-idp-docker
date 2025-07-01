@@ -57,7 +57,14 @@
 	    initializeFromBackupFile="true"
 	    >
     </MetadataProvider>
-
+    <MetadataProvider 
+	    id="jst-dev-federation" 
+	    xsi:type="FileBackedHTTPMetadataProvider" 
+	    backingFile="%{idp.home}/metadata/jst-dev-federation.xml" 
+	    metadataURL="https://registry.jst.ac.kr/rr3/metadata/federation/gjriseon-dev/SP/metadata.xml"
+	    initializeFromBackupFile="true"
+	    >
+    </MetadataProvider>
     <!-- Example HTTP metadata provider.  Use this if you want to download
          the metadata from a remote service.
 

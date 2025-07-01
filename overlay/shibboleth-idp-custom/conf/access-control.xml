@@ -33,10 +33,10 @@
         </entry>
         
         <!-- If you want to keep a separate policy for status specifically -->
-        <entry key="status.AccessByIPAddress">
+<!--         <entry key="status.AccessByIPAddress">
             <bean parent="shibboleth.IPRangeAccessControl"
                 p:allowedRanges="#{ {'10.0.0.0/16','127.0.0.1/32','::1/128','168.131.17.0/24'} }" />
-        </entry>
+        </entry> -->
         
         <!-- Other policies... -->
     </util:map>
