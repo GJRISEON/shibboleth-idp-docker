@@ -65,6 +65,23 @@ RUN $DIST/bin/install.sh \
     # && mkdir -p ${IDP_HOME}/dist/webapp/WEB-INF/lib/ \
     # && cp ${IDP_HOME}/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/dist/webapp/WEB-INF/lib/
 
+RUN echo "idp.session.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.consent.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.replayCache.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.artifact.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties
+
+
+# JDBC StorageService 플러그인 수동 설치
+RUN cd /tmp && \
+    curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/jdbc/2.1.0/java-plugin-jdbc-storage-2.1.0.tar.gz -o jdbc-plugin.tar.gz && \
+    mkdir -p jdbc-extract && \
+    tar -xf jdbc-plugin.tar.gz -C jdbc-extract && \
+    cd jdbc-extract && \
+    find . -type f -name "*.jar" -exec cp {} ${IDP_HOME}/edit-webapp/WEB-INF/lib/ \; && \
+    find . -path "*/conf/*" -type f -exec cp {} ${IDP_HOME}/conf/ \; && \
+    cd /tmp && \
+    rm -rf jdbc-extract jdbc-plugin.tar.gz
+
 # Nashorn 플러그인 수동 설치 - 다운로드 후 직접 파일 배치
 RUN cd /tmp && \
     curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/scripting/2.0.0/idp-plugin-nashorn-jdk-dist-2.0.0.tar.gz -o nashorn-plugin.tar.gz && \

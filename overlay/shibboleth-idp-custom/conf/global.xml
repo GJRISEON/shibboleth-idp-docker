@@ -51,6 +51,22 @@
         <entry key="foo" value="bar"/>
     </util:map>
     -->
+<bean id="shibboleth.DatabaseStorageService" parent="shibboleth.JDBCStorageService"
+    p:cleanupInterval="%{idp.storage.cleanupInterval:PT10M}"
+    p:dataSource-ref="shibboleth.PostgreSQLDataSource"/>
+
+<bean id="shibboleth.PostgreSQLDataSource" 
+    class="org.apache.commons.dbcp2.BasicDataSource"
+    destroy-method="close" lazy-init="true"
+    p:driverClassName="org.postgresql.Driver"
+    p:url="jdbc:postgresql://postgres-cluster-rw.postgres-system:5432/shibboleth_idp"
+    p:username="idp_user"
+    p:password="your_secure_password"
+    p:initialSize="5"
+    p:maxTotal="20"
+    p:maxIdle="10"
+    p:testOnBorrow="true"
+    p:validationQuery="SELECT 1"/>
     <bean id="WebServiceHttpClient" parent="shibboleth.HttpClientFactory"
         p:connectionTimeout="PT30S"
         p:connectionRequestTimeout="PT30S" 
