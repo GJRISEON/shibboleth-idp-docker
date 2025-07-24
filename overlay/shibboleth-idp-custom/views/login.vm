@@ -255,7 +255,7 @@
             
             // Also try cross-domain cookie if possible
             try {
-                document.cookie = `gjriseon_userType=${userType}; path=/; domain=.bitgaram.info; max-age=600; SameSite=None; Secure`;
+                document.cookie = `gjriseon_userType=${userType}; path=/; max-age=600; SameSite=None; Secure`;
                 console.log('UserType stored in cross-domain cookie:', userType);
             } catch (e) {
                 console.log('Could not set cross-domain cookie:', e.message);

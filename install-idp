@@ -11,7 +11,7 @@ TFPASS=changeit
 SEALPASS=changeit
 
 # Scope for the IdP
-SCOPE=bitgaram.info
+SCOPE=g-riseon.or.kr
 
 
 # Host name for the container

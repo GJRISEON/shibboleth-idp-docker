@@ -21,9 +21,9 @@ ENV IDP_HOME=/opt/shibboleth-idp
 
 # Shibboleth 설치 관련 환경 변수 설정
 ENV DIST=/opt/shibboleth-dist
-ENV SCOPE=bitgaram.info
-ENV ENTITYID=https://idp.bitgaram.info/idp/shibboleth
-ENV HOST=idp.bitgaram.info
+ENV SCOPE=bitaram.info
+ENV ENTITYID=https://idp.bitararm.info/idp/shibboleth
+ENV HOST=idp.bitararm.info
 ENV SEALPASS=changeit
 ENV TFPASS=changeit
 

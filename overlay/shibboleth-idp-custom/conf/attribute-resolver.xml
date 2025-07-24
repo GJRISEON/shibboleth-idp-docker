@@ -118,12 +118,10 @@
 
     <AttributeDefinition xsi:type="Simple" id="eduPersonPrincipalName">
         <InputDataConnector ref="rest"  attributeNames="eppn"/>
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.6" friendlyName="eduPersonPrincipalName" encodeType="false" />
     </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="eduPersonAffiliation">
         <InputDataConnector ref="rest"  attributeNames="eduPersonAffiliation"/>
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.1" friendlyName="eduPersonAffiliation" encodeType="false" />
     </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="mail" >

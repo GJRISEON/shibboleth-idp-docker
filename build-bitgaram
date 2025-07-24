@@ -20,16 +20,16 @@ if [ ! -d "./shibboleth-idp" ] || [ ! -f "./shibboleth-idp/conf/idp.properties" 
 fi
 
 # Fix permission issues with credentials
-if [ -f "./fetched/shibboleth-dist/credentials/idp-userfacing.p12" ]; then
-    sudo chmod 644 ./fetched/shibboleth-dist/credentials/idp-userfacing.p12
-fi
+# if [ -f "./fetched/shibboleth-dist/credentials/idp-userfacing.p12" ]; then
+#    sudo chmod 644 ./fetched/shibboleth-dist/credentials/idp-userfacing.p12
+# fi
 
 # Kubernetes용 이미지 빌드
 echo "Building Kubernetes-ready Shibboleth IdP image: ${K8S_IMAGE_WITH_TAG}"
 docker build \
     --build-arg JAVA_VERSION=$JAVA_VERSION \
     --build-arg JETTY_BASE_VERSION=$JETTY_BASE_VERSION \
-    -f Dockerfile.k8s \
+    -f Dockerfile.g-riseon \
     $@ -t ${K8S_IMAGE_WITH_TAG} .
 
 # Tag with latest as well
@@ -37,7 +37,7 @@ docker tag ${K8S_IMAGE_WITH_TAG} ${K8S_IMAGE_NAME}:latest
 
 # echo "Kubernetes image build complete: ${K8S_IMAGE_WITH_TAG}"
 # echo "This image contains a complete Shibboleth IdP installation."
-docker push registry.bitgaram.info/gjriseon-idp:latest 
+docker push ${K8S_IMAGE_WITH_TAG} 
 # && kubectl delete deployment gjriseon-idp && kubectl apply -f ~/k8s/gjriseon-idp-deployment.yaml
 # # Push both tags
 
