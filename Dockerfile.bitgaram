@@ -108,7 +108,3 @@ CMD ["java",\
 ADD overlay/jetty-base-${JETTY_BASE_VERSION}.tar ${JETTY_BASE}
 RUN chmod 640 /opt/shibboleth-idp/conf/idp.properties
 RUN chmod 640 /opt/shibboleth-idp/credentials/idp-signing.key
-
-# 헬스체크
-HEALTHCHECK --interval=1m --timeout=30s \
-    CMD curl -f -s http://127.0.0.1/idp/status || exit 1

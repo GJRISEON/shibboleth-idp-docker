@@ -27,6 +27,10 @@ ENV HOST=idp.g-riseon.or.kr
 ENV SEALPASS=changeit
 ENV TFPASS=changeit
 
+ARG IDP_SCOPE_DOMAIN 
+ARG IDP_HOST_NAME 
+ARG IDP_ENTITYID 
+ARG IDP_ORG_DISPLAYNAME
 # Jetty 로그 디렉토리는 볼륨으로 유지 
 VOLUME ["${JETTY_LOGS}"]
 
@@ -70,6 +74,13 @@ RUN echo "idp.session.StorageService = shibboleth.DatabaseStorageService" >> ${I
     echo "idp.replayCache.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
     echo "idp.artifact.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties
 
+RUN sed -i 's/__IDP_SCOPE__/'${SCOPE}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_SCOPE_DOMAIN__/'${SCOPE}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_HOST_NAME__/'${HOST}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_ORG_HOMEPAGE__ /'${IDP_ORG_HOMEPAGE}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_ORG_DISPLAYNAME__ /'${IDP_ORG_DISPLAYNAME}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_FORGOT_PASSWORD_URL__ /'${IDP_FORGOT_PASSWORD_URL}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_SUPPORT_URL__ /'${IDP_SUPPORT_URL}'/' $IDP_HOME/messages/messages_ko.properties
 
 # JDBC StorageService 플러그인 수동 설치
 RUN cd /tmp && \
@@ -108,7 +119,3 @@ CMD ["java",\
 ADD overlay/jetty-base-${JETTY_BASE_VERSION}.tar ${JETTY_BASE}
 RUN chmod 640 /opt/shibboleth-idp/conf/idp.properties
 RUN chmod 640 /opt/shibboleth-idp/credentials/idp-signing.key
-
-# 헬스체크
-HEALTHCHECK --interval=1m --timeout=30s \
-    CMD curl -f -s http://127.0.0.1/idp/status || exit 1

@@ -29,6 +29,7 @@ echo "Building Kubernetes-ready Shibboleth IdP image: ${K8S_IMAGE_WITH_TAG}"
 docker build \
     --build-arg JAVA_VERSION=$JAVA_VERSION \
     --build-arg JETTY_BASE_VERSION=$JETTY_BASE_VERSION \
+    --build-arg IDP_ORG_DISPLAYNAME="G-RISEON" \
     -f Dockerfile.g-riseon \
     $@ -t ${K8S_IMAGE_WITH_TAG} .
 
