@@ -43,8 +43,20 @@
             <p>#springMessageText("idp.logout.cancelled", "Logout has been cancelled.")</p>
           #elseif ($activeSPSessions)
             <p style="font-size: 18pt">#springMessageText("idp.logout.local", "로그아웃 완료, PC방등 공공장소에 사용 중이라면 브라우져를 닫아주세요.")</p>
+            <p style="font-size: 14pt; margin-top: 20px;">
+              <span id="countdown">3</span>초 후 메인 페이지로 이동합니다...
+            </p>
+            <p style="margin-top: 10px;">
+              <a href="$redirectUrl" style="color: #0066cc; text-decoration: underline;">지금 바로 이동하기</a>
+            </p>
           #else
             <p>#springMessageText("idp.logout.complete", "The logout operation is complete, and no other services appear to have been accessed during this session.")</p>
+            <p style="font-size: 14pt; margin-top: 20px;">
+              <span id="countdown">3</span>초 후 메인 페이지로 이동합니다...
+            </p>
+            <p style="margin-top: 10px;">
+              <a href="$redirectUrl" style="color: #0066cc; text-decoration: underline;">지금 바로 이동하기</a>
+            </p>
           #end
         
          ## </div>
@@ -71,5 +83,23 @@
       </footer>
     </div>
     
- 	</body>
+    <script>
+      // 카운트다운 기능
+      let countdown = 3;
+      const countdownElement = document.getElementById('countdown');
+      
+      if (countdownElement) {
+        const timer = setInterval(function() {
+          countdown--;
+          countdownElement.textContent = countdown;
+          
+          if (countdown <= 0) {
+            clearInterval(timer);
+            window.location.href = '$redirectUrl';
+          }
+        }, 1000);
+      }
+    </script>
+    
+     </body>
 </html>

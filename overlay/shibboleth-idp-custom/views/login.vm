@@ -168,7 +168,7 @@
                     <div class="formbox">
                         <h2>
                             <p class="rise-logo">광주 RISE</p>
-                            <img src="$request.getContextPath()/images/logo.png" alt="GRISEON">
+                            <img src="$request.getContextPath()/images/logo.svg" alt="GRISEON">
                         </h2>
                         <div class="txt-box">
                             <h3>Login</h3>
@@ -182,7 +182,7 @@
                         #if($userType == "company")
                             <a href="javascript:;" class="active"><strong>회사 계정정보</strong>를 입력해주세요.</a>
                         #else
-                            <a href="javascript:;" class="active"><strong>학교 계정정보</strong>를 입력해주세요.</a>
+                            <a href="javascript:;" class="active"><strong>계정정보</strong>를 입력해주세요.</a>
                         #end
                         </div>
                         <div class="inputbox id">
@@ -276,7 +276,7 @@
                 } else if (userType === 'external') {
                     signElement.innerHTML = '<strong>대학 계정정보</strong>를 입력해주세요.';
                 } else {
-                    signElement.innerHTML = '<strong>학교 계정정보</strong>를 입력해주세요.';
+                    signElement.innerHTML = '<strong>계정정보</strong>를 입력해주세요.';
                 }
             }
         }
