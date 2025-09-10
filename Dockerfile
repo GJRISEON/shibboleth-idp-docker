@@ -24,12 +24,15 @@ ENV DIST=/opt/shibboleth-dist
 ENV SEALPASS=changeit
 ENV TFPASS=changeit
 
-# Build arguments with default values
-ARG IDP_SCOPE=kwu.ac.kr
-ARG IDP_SCOPE_DOMAIN=kwu.ac.kr
-ARG IDP_HOST_NAME=idp.kwu.ac.kr
-ARG IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth
-ARG IDP_ORG_DISPLAYNAME="Kwangwoon University"
+# Build arguments (no default values - must be provided via --build-arg)
+ARG IDP_SCOPE
+ARG IDP_SCOPE_DOMAIN  
+ARG IDP_HOST_NAME
+ARG IDP_ENTITYID
+ARG IDP_ORG_DISPLAYNAME
+ARG IDP_ORG_HOMEPAGE
+ARG IDP_FORGOT_PASSWORD_URL
+ARG IDP_SUPPORT_URL
 ARG JETTY_BASE_VERSION=12.0
 
 # 즉시 ARG 값을 테스트
@@ -67,6 +70,16 @@ COPY fetched/shibboleth-dist/ ${DIST}/
 
 WORKDIR ${JETTY_BASE}
 
+# Convert ARGs to ENVs for use in RUN commands
+ENV IDP_SCOPE=${IDP_SCOPE}
+ENV IDP_SCOPE_DOMAIN=${IDP_SCOPE_DOMAIN}
+ENV IDP_HOST_NAME=${IDP_HOST_NAME}
+ENV IDP_ENTITYID=${IDP_ENTITYID}
+ENV IDP_ORG_DISPLAYNAME=${IDP_ORG_DISPLAYNAME}
+ENV IDP_ORG_HOMEPAGE=${IDP_ORG_HOMEPAGE}
+ENV IDP_FORGOT_PASSWORD_URL=${IDP_FORGOT_PASSWORD_URL}
+ENV IDP_SUPPORT_URL=${IDP_SUPPORT_URL}
+
 # ENV 값을 사용 (이미 위에서 ARG를 ENV로 변환했음)
 RUN echo "=== Environment Variables ===" && \
     echo "IDP_SCOPE: ${IDP_SCOPE}" && \
@@ -89,19 +102,23 @@ RUN echo "=== Environment Variables ===" && \
 RUN echo "idp.session.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
     echo "idp.consent.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
     echo "idp.replayCache.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
-    echo "idp.artifact.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties
+    echo "idp.artifact.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "# Consent Configuration" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.consent.attribute-release.enabled = true" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.consent.attribute-release.compareValues = true" >> ${IDP_HOME}/conf/idp.properties
 
 COPY overlay/shibboleth-idp-custom/ ${IDP_HOME}/
 
-RUN sed -i 's/__IDP_SCOPE__/'${IDP_SCOPE}'/' $IDP_HOME/messages/messages_ko.properties
-RUN sed -i 's/__IDP_SCOPE_DOMAIN__/'${IDP_SCOPE_DOMAIN}'/' $IDP_HOME/messages/messages_ko.properties
-RUN sed -i 's/__IDP_HOST_NAME__/'${IDP_HOST_NAME}'/' $IDP_HOME/messages/messages_ko.properties
-RUN sed -i 's/__IDP_ORG_HOMEPAGE__/'${IDP_ORG_HOMEPAGE}'/' $IDP_HOME/messages/messages_ko.properties
-RUN sed -i 's/__IDP_ORG_DISPLAYNAME__/'${IDP_ORG_DISPLAYNAME}'/' $IDP_HOME/messages/messages_ko.properties
-RUN sed -i 's/__IDP_FORGOT_PASSWORD_URL__/'${IDP_FORGOT_PASSWORD_URL}'/' $IDP_HOME/messages/messages_ko.properties
-RUN sed -i 's/__IDP_SUPPORT_URL__/'${IDP_SUPPORT_URL}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_SCOPE__#${IDP_SCOPE}#" $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_SCOPE_DOMAIN__#${IDP_SCOPE_DOMAIN}#" $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_HOST_NAME__#${IDP_HOST_NAME}#" $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_ORG_HOMEPAGE__#${IDP_ORG_HOMEPAGE}#" $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_ORG_DISPLAYNAME__#${IDP_ORG_DISPLAYNAME}#" $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_FORGOT_PASSWORD_URL__#${IDP_FORGOT_PASSWORD_URL}#" $IDP_HOME/messages/messages_ko.properties
+RUN sed -i "s#__IDP_SUPPORT_URL__#${IDP_SUPPORT_URL}#" $IDP_HOME/messages/messages_ko.properties
 
-# JDBC StorageService 플러그인 수동 설치
+# Install all plugins first, then build once
+# JDBC StorageService 플러그인 설치
 RUN cd /tmp && \
     curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/jdbc/2.1.0/java-plugin-jdbc-storage-2.1.0.tar.gz -o jdbc-plugin.tar.gz && \
     mkdir -p jdbc-extract && \
@@ -112,7 +129,7 @@ RUN cd /tmp && \
     cd /tmp && \
     rm -rf jdbc-extract jdbc-plugin.tar.gz
 
-# Nashorn 플러그인 수동 설치 - 다운로드 후 직접 파일 배치
+# Nashorn 플러그인 설치
 RUN cd /tmp && \
     curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/scripting/2.0.0/idp-plugin-nashorn-jdk-dist-2.0.0.tar.gz -o nashorn-plugin.tar.gz && \
     mkdir -p nashorn-extract && \
@@ -121,10 +138,11 @@ RUN cd /tmp && \
     find . -type f -name "*.jar" -exec cp {} ${IDP_HOME}/edit-webapp/WEB-INF/lib/ \; && \
     find . -path "*/flows/*" -type d -exec cp -r {} ${IDP_HOME}/flows/ \; && \
     find . -path "*/conf/*" -type f -exec cp {} ${IDP_HOME}/conf/ \; && \
-    cd ${IDP_HOME} && \
-    ./bin/build.sh && \
     cd /tmp && \
     rm -rf nashorn-extract nashorn-plugin.tar.gz
+
+# Build IdP WAR with all plugins installed
+RUN cd ${IDP_HOME} && ./bin/build.sh
 
 # Jetty 로깅 모듈 활성화
 CMD ["java",\

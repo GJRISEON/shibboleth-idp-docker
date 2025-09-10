@@ -68,8 +68,13 @@ jobs:
         echo "  JAVA_VERSION=${{ env.JAVA_VERSION }}"
         echo "  JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }}"
         echo "  IDP_SCOPE=kwu.ac.kr"
+        echo "  IDP_SCOPE_DOMAIN=kwu.ac.kr"
         echo "  IDP_HOST_NAME=idp.kwu.ac.kr"
         echo "  IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth"
+        echo "  IDP_ORG_DISPLAYNAME=Kwangwoon University"
+        echo "  IDP_ORG_HOMEPAGE=https://www.kw.ac.kr"
+        echo "  IDP_FORGOT_PASSWORD_URL="
+        echo "  IDP_SUPPORT_URL="
         
         echo "Current directory contents:"
         ls -la
@@ -79,8 +84,13 @@ jobs:
           --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
           --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
           --build-arg IDP_SCOPE=kwu.ac.kr \
+          --build-arg IDP_SCOPE_DOMAIN=kwu.ac.kr \
           --build-arg IDP_HOST_NAME=idp.kwu.ac.kr \
           --build-arg IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth \
+          --build-arg IDP_ORG_DISPLAYNAME="Kwangwoon University" \
+          --build-arg IDP_ORG_HOMEPAGE="https://www.kw.ac.kr" \
+          --build-arg IDP_FORGOT_PASSWORD_URL="" \
+          --build-arg IDP_SUPPORT_URL="" \
           -t ${{ env.IMAGE_TAG_TIMESTAMP }} \
           -t ${{ env.IMAGE_TAG_LATEST }} .
     

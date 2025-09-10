@@ -35,7 +35,7 @@
                 <ref bean="SAML1.AttributeQuery" />
                 <ref bean="SAML1.ArtifactResolution" />
                 -->
-                <bean parent="SAML2.SSO" />
+                <bean parent="SAML2.SSO" p:includeAttributeStatement="true" />
                 <ref bean="SAML2.ECP" />
                 <ref bean="SAML2.Logout" />
                 <!--
