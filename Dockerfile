@@ -40,7 +40,7 @@ ADD jetty-base-${JETTY_BASE_VERSION} ${JETTY_BASE}
 ADD jetty-dist/dist ${JETTY_HOME}
 
 # 중요: Shibboleth IdP 디렉토리 복사 (볼륨으로 선언하지 않음)
-COPY shibboleth-idp/ ${IDP_HOME}/
+# COPY shibboleth-idp/ ${IDP_HOME}/
 
 COPY overlay/shibboleth-idp-custom/ ${IDP_HOME}/
 
