@@ -44,6 +44,16 @@ jobs:
         # Set image tags
         echo "IMAGE_TAG_TIMESTAMP=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TIMESTAMP" >> $GITHUB_ENV
         echo "IMAGE_TAG_LATEST=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
+
+    - name: Fetch Jetty and Shibboleth components
+      run: |
+        echo "Fetching Jetty distribution..."
+        chmod +x ./fetch-jetty
+        ./fetch-jetty
+        
+        echo "Fetching Shibboleth IdP distribution..."
+        chmod +x ./fetch-shib
+        ./fetch-shib
     
     - name: Build Docker image
       run: |
