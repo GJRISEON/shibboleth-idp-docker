@@ -69,6 +69,7 @@ jobs:
           --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
           --build-arg IDP_SCOPE=kwu.ac.kr \
           --build-arg IDP_HOST_NAME=idp.kwu.ac.kr \
+          --build-arg IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth \
           -t ${{ env.IMAGE_TAG_TIMESTAMP }} \
           -t ${{ env.IMAGE_TAG_LATEST }} .
     
