@@ -60,22 +60,26 @@ COPY fetched/shibboleth-dist/ ${DIST}/
 
 WORKDIR ${JETTY_BASE}
 
-# 디버그: 환경 변수 값 확인
-RUN echo "=== Environment Variables ===" && \
-    echo "IDP_SCOPE: $IDP_SCOPE" && \
-    echo "IDP_HOST_NAME: $IDP_HOST_NAME" && \
-    echo "IDP_ENTITYID: $IDP_ENTITYID" && \
-    echo "SEALPASS: $SEALPASS" && \
-    echo "TFPASS: $TFPASS" && \
-    echo "=========================="
+# ARG를 다시 선언하여 확실하게 사용 가능하게 함
+ARG IDP_SCOPE
+ARG IDP_HOST_NAME 
+ARG IDP_ENTITYID
 
-RUN $DIST/bin/install.sh \
-    --targetDir $IDP_HOME \
-    --scope $IDP_SCOPE \
-    --entityID $IDP_ENTITYID \
-    --hostName $IDP_HOST_NAME \
-    --sealerPassword $SEALPASS \
-    --keystorePassword $TFPASS \
+# ARG를 RUN 명령에서 직접 사용
+RUN echo "=== Build Arguments ===" && \
+    echo "IDP_SCOPE: ${IDP_SCOPE}" && \
+    echo "IDP_HOST_NAME: ${IDP_HOST_NAME}" && \
+    echo "IDP_ENTITYID: ${IDP_ENTITYID}" && \
+    echo "SEALPASS: ${SEALPASS}" && \
+    echo "TFPASS: ${TFPASS}" && \
+    echo "========================" && \
+    ${DIST}/bin/install.sh \
+    --targetDir ${IDP_HOME} \
+    --scope "${IDP_SCOPE}" \
+    --entityID "${IDP_ENTITYID}" \
+    --hostName "${IDP_HOST_NAME}" \
+    --sealerPassword "${SEALPASS}" \
+    --keystorePassword "${TFPASS}" \
     --noPrompt 
     # && mkdir -p ${IDP_HOME}/dist/webapp/WEB-INF/lib/ \
     # && cp ${IDP_HOME}/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/dist/webapp/WEB-INF/lib/
