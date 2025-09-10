@@ -49,8 +49,6 @@ COPY fetched/shibboleth-dist/ ${DIST}/
 # REST 인증 JAR 파일 복사 및 배치
 #COPY overlay/shibboleth-idp-custom/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/edit-webapp/WEB-INF/lib/ 
 
-# 포트 노출
-EXPOSE 80 443 8443
 
 WORKDIR ${JETTY_BASE}
 
@@ -117,3 +115,6 @@ CMD ["java",\
 ADD overlay/jetty-base-${JETTY_BASE_VERSION}.tar ${JETTY_BASE}
 RUN chmod 640 /opt/shibboleth-idp/conf/idp.properties
 RUN chmod 640 /opt/shibboleth-idp/credentials/idp-signing.key
+
+# 포트 노출
+EXPOSE 80 443 8443
