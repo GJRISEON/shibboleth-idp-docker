@@ -4,7 +4,8 @@
       "Bash(source:*)",
       "Bash(echo:*)",
       "Bash(bash:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

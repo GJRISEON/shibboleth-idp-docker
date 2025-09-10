@@ -9,8 +9,8 @@ on:
       - idp-kwu-ac-kr
 
 env:
-  REGISTRY: registry.bitgaram.info
-  IMAGE_REPO: idp-kwu-ac-kr
+  REGISTRY: ghcr.io
+  IMAGE_REPO: bitgaram-info/idp-kwu-ac-kr
 
 jobs:
   build-and-push:
@@ -27,8 +27,8 @@ jobs:
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
-        username: 'admin' 
-        password: 'qlcrkfka1#'
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Load environment variables
       shell: bash
