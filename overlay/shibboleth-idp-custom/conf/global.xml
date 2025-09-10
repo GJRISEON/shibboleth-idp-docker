@@ -57,9 +57,9 @@
         <value>consent</value>
     </util:list>
 
-<bean id="shibboleth.DatabaseStorageService" parent="shibboleth.JDBCStorageService
+<bean id="shibboleth.DatabaseStorageService" parent="shibboleth.JDBCStorageService"
     p:cleanupInterval="%{idp.storage.cleanupInterval:PT10M}"
-    p:dataSource-ref="shibboleth.PostgreSQLDataSource"/>
+    p:dataSource-ref="shibboleth.PostgreSQLDataSource" />
 
 <bean id="shibboleth.PostgreSQLDataSource" 
     class="org.apache.commons.dbcp2.BasicDataSource"
