@@ -24,7 +24,7 @@ ENV DIST=/opt/shibboleth-dist
 ENV SEALPASS=changeit
 ENV TFPASS=changeit
 
-# Build arguments (no default values - must be provided via --build-arg)
+# Build arguments (must be provided via --build-arg)
 ARG IDP_SCOPE
 ARG IDP_SCOPE_DOMAIN  
 ARG IDP_HOST_NAME

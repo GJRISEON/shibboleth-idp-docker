@@ -70,11 +70,17 @@ jobs:
         echo "IDP_HOST_NAME: idp.kwu.ac.kr"
         echo "IDP_ENTITYID: https://idp.kwu.ac.kr/idp/shibboleth"
         echo "========================="
+        echo "Testing build-args syntax:"
+        echo "--build-arg IDP_SCOPE=kwu.ac.kr"
+        echo "--build-arg IDP_HOST_NAME=idp.kwu.ac.kr"
+        echo "--build-arg IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth"
+        echo "========================="
     
     - name: Build Docker image with direct docker command
       run: |
         echo "Building Docker image with direct docker build command..."
         docker build \
+          --no-cache \
           --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
           --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
           --build-arg IDP_SCOPE=kwu.ac.kr \
