@@ -42,8 +42,8 @@ jobs:
         echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
         
         # Set image tags
-        echo "IMAGE_TAG_TIMESTAMP=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TIMESTAMP" >> $GITHUB_ENV
-        echo "IMAGE_TAG_LATEST=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
+        echo "IMAGE_TAG_TIMESTAMP=${REGISTRY}/${IMAGE_NAME}:$TIMESTAMP" >> $GITHUB_ENV
+        echo "IMAGE_TAG_LATEST=${REGISTRY}/${IMAGE_NAME}:latest" >> $GITHUB_ENV
 
     - name: Fetch Jetty and Shibboleth components
       run: |
@@ -81,30 +81,30 @@ jobs:
         echo "Building Docker image with direct docker build command..."
         docker build \
           --no-cache \
-          --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
-          --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
-          --build-arg IDP_SCOPE=kwu.ac.kr \
-          --build-arg IDP_SCOPE_DOMAIN=kwu.ac.kr \
-          --build-arg IDP_HOST_NAME=idp.kwu.ac.kr \
-          --build-arg IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth \
-          --build-arg IDP_ORG_DISPLAYNAME="Kwangwoon University" \
-          --build-arg IDP_ORG_HOMEPAGE="https://www.kw.ac.kr" \
-          -t ${{ env.IMAGE_TAG_TIMESTAMP }} \
-          -t ${{ env.IMAGE_TAG_LATEST }} .
+          --build-arg "JAVA_VERSION=${JAVA_VERSION}" \
+          --build-arg "JETTY_BASE_VERSION=${JETTY_BASE_VERSION}" \
+          --build-arg "IDP_SCOPE=kwu.ac.kr" \
+          --build-arg "IDP_SCOPE_DOMAIN=kwu.ac.kr" \
+          --build-arg "IDP_HOST_NAME=idp.kwu.ac.kr" \
+          --build-arg "IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth" \
+          --build-arg "IDP_ORG_DISPLAYNAME=Kwangwoon University" \
+          --build-arg "IDP_ORG_HOMEPAGE=https://www.kw.ac.kr" \
+          -t "${IMAGE_TAG_TIMESTAMP}" \
+          -t "${IMAGE_TAG_LATEST}" .
     
     - name: Push Docker images
       run: |
         echo "Pushing images to registry..."
-        docker push ${{ env.IMAGE_TAG_TIMESTAMP }}
-        docker push ${{ env.IMAGE_TAG_LATEST }}
+        docker push "${IMAGE_TAG_TIMESTAMP}"
+        docker push "${IMAGE_TAG_LATEST}"
         
         echo "Successfully pushed:"
-        echo "  - ${{ env.IMAGE_TAG_TIMESTAMP }}"
-        echo "  - ${{ env.IMAGE_TAG_LATEST }}"
+        echo "  - ${IMAGE_TAG_TIMESTAMP}"
+        echo "  - ${IMAGE_TAG_LATEST}"
     
     - name: Image scan (optional)
       continue-on-error: true
       run: |
         echo "Image built and pushed successfully!"
-        echo "Image: ${{ env.IMAGE_TAG_TIMESTAMP }}"
-        echo "Latest: ${{ env.IMAGE_TAG_LATEST }}"
+        echo "Image: ${IMAGE_TAG_TIMESTAMP}"
+        echo "Latest: ${IMAGE_TAG_LATEST}"
