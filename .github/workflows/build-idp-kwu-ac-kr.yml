@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_REPO: bitgaram-info/idp-kwu-ac-kr
+  IMAGE_REPO: bitgaram-info/shibboleth-idp-docker/idp-kwu-ac-kr
 
 jobs:
   build-and-push:
