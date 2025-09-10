@@ -71,23 +71,30 @@ jobs:
         echo "IDP_ENTITYID: https://idp.kwu.ac.kr/idp/shibboleth"
         echo "========================="
     
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ env.IMAGE_TAG_TIMESTAMP }}
-          ${{ env.IMAGE_TAG_LATEST }}
-        build-args: |
-          JAVA_VERSION=${{ env.JAVA_VERSION }}
-          JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }}
-          IDP_SCOPE=kwu.ac.kr
-          IDP_SCOPE_DOMAIN=kwu.ac.kr
-          IDP_HOST_NAME=idp.kwu.ac.kr
-          IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth
-          IDP_ORG_DISPLAYNAME=Kwangwoon University
-          IDP_ORG_HOMEPAGE=https://www.kw.ac.kr
+    - name: Build Docker image with direct docker command
+      run: |
+        echo "Building Docker image with direct docker build command..."
+        docker build \
+          --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
+          --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
+          --build-arg IDP_SCOPE=kwu.ac.kr \
+          --build-arg IDP_SCOPE_DOMAIN=kwu.ac.kr \
+          --build-arg IDP_HOST_NAME=idp.kwu.ac.kr \
+          --build-arg IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth \
+          --build-arg IDP_ORG_DISPLAYNAME="Kwangwoon University" \
+          --build-arg IDP_ORG_HOMEPAGE="https://www.kw.ac.kr" \
+          -t ${{ env.IMAGE_TAG_TIMESTAMP }} \
+          -t ${{ env.IMAGE_TAG_LATEST }} .
+    
+    - name: Push Docker images
+      run: |
+        echo "Pushing images to registry..."
+        docker push ${{ env.IMAGE_TAG_TIMESTAMP }}
+        docker push ${{ env.IMAGE_TAG_LATEST }}
+        
+        echo "Successfully pushed:"
+        echo "  - ${{ env.IMAGE_TAG_TIMESTAMP }}"
+        echo "  - ${{ env.IMAGE_TAG_LATEST }}"
     
     - name: Image scan (optional)
       continue-on-error: true
