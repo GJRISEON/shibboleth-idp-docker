@@ -22,7 +22,7 @@ SHIB_RELEASE=5.1.4
 #
 # Image repository.
 #
-IMAGE_REPO=shibboleth-idp
+# IMAGE_REPO=shibboleth-idp
 
 #
 # Image tag suffix, to allow us to build multiple images with (for example)
