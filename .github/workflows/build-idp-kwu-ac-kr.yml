@@ -56,11 +56,11 @@ jobs:
         chmod +x ./fetch-shib
         ./fetch-shib
     
-    - name: Build and prepare components
+    - name: Prepare overlay components
       run: |
-        echo "Running build script to prepare overlay and components..."
-        chmod +x ./build
-        ./build
+        echo "Preparing overlay components..."
+        chmod +x ./prepare-overlay
+        ./prepare-overlay
     
     - name: Debug build arguments and environment
       shell: bash

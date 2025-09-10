@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#
+# Prepares overlay files for Docker build.
+#
+# This script only handles the overlay preparation part that was
+# previously in the build script, without doing the actual Docker build.
+#
+
+#
+# Assumes that "fetch-jetty" has already been run to acquire the
+# Jetty distribution.
+#
+. VERSIONS
+
+#
+# Create empty overlay directories if they don't already exist.
+#
+mkdir -p overlay/jetty-base-${JETTY_BASE_VERSION}
+
+#
+# Package the overlays. This allows us to be sure that they can
+# be pulled into the image even if the overlay directories are
+# actually symbolic links.
+#
+OVERLAY_DIR=`pwd`/overlay
+pushd ${OVERLAY_DIR}/jetty-base-${JETTY_BASE_VERSION}
+  tar --create --file ${OVERLAY_DIR}/jetty-base-${JETTY_BASE_VERSION}.tar .
+popd
+
+cp -f -r ./overlay/shibboleth-idp-custom/* ./shibboleth-idp
+
+echo "Overlay preparation completed:"
+echo "  - Created jetty-base-${JETTY_BASE_VERSION}.tar"
+echo "  - Copied shibboleth-idp-custom files"
+
+#
+# End.
+#

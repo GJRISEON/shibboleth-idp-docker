@@ -3,7 +3,8 @@
     "allow": [
       "Bash(source:*)",
       "Bash(echo:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
