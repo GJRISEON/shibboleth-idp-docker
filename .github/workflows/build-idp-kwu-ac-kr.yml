@@ -61,8 +61,18 @@ jobs:
         chmod +x ./build
         ./build
     
+    - name: Debug build arguments
+      run: |
+        echo "=== Debug Information ==="
+        echo "JAVA_VERSION: ${{ env.JAVA_VERSION }}"
+        echo "JETTY_BASE_VERSION: ${{ env.JETTY_BASE_VERSION }}"
+        echo "IDP_SCOPE: kwu.ac.kr"
+        echo "IDP_HOST_NAME: idp.kwu.ac.kr"
+        echo "IDP_ENTITYID: https://idp.kwu.ac.kr/idp/shibboleth"
+        echo "========================="
+    
     - name: Build and push Docker image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         push: true
@@ -78,8 +88,6 @@ jobs:
           IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth
           IDP_ORG_DISPLAYNAME=Kwangwoon University
           IDP_ORG_HOMEPAGE=https://www.kw.ac.kr
-          IDP_FORGOT_PASSWORD_URL=
-          IDP_SUPPORT_URL=
     
     - name: Image scan (optional)
       continue-on-error: true
