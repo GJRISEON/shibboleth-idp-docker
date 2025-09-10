@@ -24,13 +24,20 @@ ENV DIST=/opt/shibboleth-dist
 ENV SEALPASS=changeit
 ENV TFPASS=changeit
 
-# Build arguments
-ARG IDP_SCOPE
-ARG IDP_SCOPE_DOMAIN 
-ARG IDP_HOST_NAME 
-ARG IDP_ENTITYID 
-ARG IDP_ORG_DISPLAYNAME
-ARG JETTY_BASE_VERSION
+# Build arguments with default values
+ARG IDP_SCOPE=kwu.ac.kr
+ARG IDP_SCOPE_DOMAIN=kwu.ac.kr
+ARG IDP_HOST_NAME=idp.kwu.ac.kr
+ARG IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth
+ARG IDP_ORG_DISPLAYNAME="Kwangwoon University"
+ARG JETTY_BASE_VERSION=12.0
+
+# 즉시 ARG 값을 테스트
+RUN echo "Testing ARG values immediately after declaration:" && \
+    echo "ARG IDP_SCOPE: ${IDP_SCOPE}" && \
+    echo "ARG IDP_HOST_NAME: ${IDP_HOST_NAME}" && \
+    echo "ARG IDP_ENTITYID: ${IDP_ENTITYID}" && \
+    echo "End of ARG test"
 
 # ARG를 ENV로 설정하여 RUN 명령에서 사용 가능하게 함
 ENV IDP_SCOPE=${IDP_SCOPE}

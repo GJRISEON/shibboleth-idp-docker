@@ -71,7 +71,11 @@ jobs:
         echo "  IDP_HOST_NAME=idp.kwu.ac.kr"
         echo "  IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth"
         
-        docker build \
+        echo "Current directory contents:"
+        ls -la
+        
+        echo "Building with verbose output..."
+        docker build --progress=plain \
           --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
           --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
           --build-arg IDP_SCOPE=kwu.ac.kr \
