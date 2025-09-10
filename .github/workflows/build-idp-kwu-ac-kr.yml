@@ -73,6 +73,12 @@ jobs:
         echo "IMAGE_TAG_TIMESTAMP: ${IMAGE_TAG_TIMESTAMP}"
         echo "IMAGE_TAG_LATEST: ${IMAGE_TAG_LATEST}"
         echo "========================="
+        echo "=== Testing VERSIONS file again ==="
+        source ./VERSIONS
+        echo "After sourcing VERSIONS:"
+        echo "JAVA_VERSION from VERSIONS: $JAVA_VERSION"
+        echo "JETTY_BASE_VERSION from VERSIONS: $JETTY_BASE_VERSION"
+        echo "========================="
         echo "=== Build Arguments to be passed ==="
         echo "JAVA_VERSION: ${JAVA_VERSION}"
         echo "JETTY_BASE_VERSION: ${JETTY_BASE_VERSION}"
@@ -88,49 +94,75 @@ jobs:
       shell: bash
       run: |
         echo "Building Docker image with direct docker build command..."
+        
+        # Source VERSIONS file to get current values
+        source ./VERSIONS
+        
+        # Generate timestamp and image tags locally  
+        TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_NAME}:${TIMESTAMP}"
+        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+        
+        # Save timestamp for next step
+        echo "BUILD_TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+        
+        echo "=== Using Local Variables ==="
+        echo "JAVA_VERSION: $JAVA_VERSION"
+        echo "JETTY_BASE_VERSION: $JETTY_BASE_VERSION" 
+        echo "IMAGE_TAG_TIMESTAMP: $IMAGE_TAG_TIMESTAMP"
+        echo "IMAGE_TAG_LATEST: $IMAGE_TAG_LATEST"
+        echo "========================="
+        
         echo "=== Full Docker Build Command ==="
         echo "docker build \\"
         echo "  --no-cache \\"
-        echo "  --build-arg \"JAVA_VERSION=${JAVA_VERSION}\" \\"
-        echo "  --build-arg \"JETTY_BASE_VERSION=${JETTY_BASE_VERSION}\" \\"
+        echo "  --build-arg \"JAVA_VERSION=$JAVA_VERSION\" \\"
+        echo "  --build-arg \"JETTY_BASE_VERSION=$JETTY_BASE_VERSION\" \\"
         echo "  --build-arg \"IDP_SCOPE=kwu.ac.kr\" \\"
         echo "  --build-arg \"IDP_SCOPE_DOMAIN=kwu.ac.kr\" \\"
         echo "  --build-arg \"IDP_HOST_NAME=idp.kwu.ac.kr\" \\"
         echo "  --build-arg \"IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth\" \\"
         echo "  --build-arg \"IDP_ORG_DISPLAYNAME=Kwangwoon University\" \\"
         echo "  --build-arg \"IDP_ORG_HOMEPAGE=https://www.kw.ac.kr\" \\"
-        echo "  -t \"${IMAGE_TAG_TIMESTAMP}\" \\"
-        echo "  -t \"${IMAGE_TAG_LATEST}\" ."
+        echo "  -t \"$IMAGE_TAG_TIMESTAMP\" \\"
+        echo "  -t \"$IMAGE_TAG_LATEST\" ."
         echo "========================="
         
         docker build \
           --no-cache \
-          --build-arg "JAVA_VERSION=${JAVA_VERSION}" \
-          --build-arg "JETTY_BASE_VERSION=${JETTY_BASE_VERSION}" \
+          --build-arg "JAVA_VERSION=$JAVA_VERSION" \
+          --build-arg "JETTY_BASE_VERSION=$JETTY_BASE_VERSION" \
           --build-arg "IDP_SCOPE=kwu.ac.kr" \
           --build-arg "IDP_SCOPE_DOMAIN=kwu.ac.kr" \
           --build-arg "IDP_HOST_NAME=idp.kwu.ac.kr" \
           --build-arg "IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth" \
           --build-arg "IDP_ORG_DISPLAYNAME=Kwangwoon University" \
           --build-arg "IDP_ORG_HOMEPAGE=https://www.kw.ac.kr" \
-          -t "${IMAGE_TAG_TIMESTAMP}" \
-          -t "${IMAGE_TAG_LATEST}" .
+          -t "$IMAGE_TAG_TIMESTAMP" \
+          -t "$IMAGE_TAG_LATEST" .
     
     - name: Push Docker images
       shell: bash
       run: |
+        # Use the timestamp from the build step
+        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_NAME}:${BUILD_TIMESTAMP}"
+        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+        
         echo "Pushing images to registry..."
-        docker push "${IMAGE_TAG_TIMESTAMP}"
-        docker push "${IMAGE_TAG_LATEST}"
+        docker push "$IMAGE_TAG_TIMESTAMP"
+        docker push "$IMAGE_TAG_LATEST"
         
         echo "Successfully pushed:"
-        echo "  - ${IMAGE_TAG_TIMESTAMP}"
-        echo "  - ${IMAGE_TAG_LATEST}"
+        echo "  - $IMAGE_TAG_TIMESTAMP"
+        echo "  - $IMAGE_TAG_LATEST"
     
     - name: Image scan (optional)
       continue-on-error: true
       shell: bash
       run: |
+        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_NAME}:${BUILD_TIMESTAMP}"
+        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+        
         echo "Image built and pushed successfully!"
-        echo "Image: ${IMAGE_TAG_TIMESTAMP}"
-        echo "Latest: ${IMAGE_TAG_LATEST}"
+        echo "Image: $IMAGE_TAG_TIMESTAMP"
+        echo "Latest: $IMAGE_TAG_LATEST"
