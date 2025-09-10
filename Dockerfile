@@ -31,9 +31,17 @@ ARG IDP_HOST_NAME
 ARG IDP_ENTITYID
 ARG IDP_ORG_DISPLAYNAME
 ARG IDP_ORG_HOMEPAGE
-ARG IDP_FORGOT_PASSWORD_URL=""
-ARG IDP_SUPPORT_URL=""
+ARG IDP_FORGOT_PASSWORD_URL
+ARG IDP_SUPPORT_URL
 ARG JETTY_BASE_VERSION=12.0
+
+# Debug: Show ARG values immediately after declaration
+RUN echo "=== ARG Values Debug ===" && \
+    echo "IDP_SCOPE ARG: ${IDP_SCOPE}" && \
+    echo "IDP_HOST_NAME ARG: ${IDP_HOST_NAME}" && \
+    echo "IDP_ENTITYID ARG: ${IDP_ENTITYID}" && \
+    echo "JETTY_BASE_VERSION ARG: ${JETTY_BASE_VERSION}" && \
+    echo "========================"
 
 # Immediately convert ARGs to ENVs to preserve values
 ENV IDP_SCOPE=${IDP_SCOPE}
@@ -45,12 +53,6 @@ ENV IDP_ORG_HOMEPAGE=${IDP_ORG_HOMEPAGE}
 ENV IDP_FORGOT_PASSWORD_URL=${IDP_FORGOT_PASSWORD_URL}
 ENV IDP_SUPPORT_URL=${IDP_SUPPORT_URL}
 
-# 즉시 ARG 값을 테스트
-RUN echo "Testing ARG values immediately after declaration:" && \
-    echo "ARG IDP_SCOPE: ${IDP_SCOPE}" && \
-    echo "ARG IDP_HOST_NAME: ${IDP_HOST_NAME}" && \
-    echo "ARG IDP_ENTITYID: ${IDP_ENTITYID}" && \
-    echo "End of ARG test"
 # Jetty 로그 디렉토리는 볼륨으로 유지 
 VOLUME ["${JETTY_LOGS}"]
 
