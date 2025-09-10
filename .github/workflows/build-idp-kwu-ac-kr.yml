@@ -1,0 +1,83 @@
+name: Build and Push IdP KWU AC KR
+
+on:
+  push:
+    branches:
+      - idp-kwu-ac-kr
+  pull_request:
+    branches:
+      - idp-kwu-ac-kr
+
+env:
+  REGISTRY: registry.bitgaram.info
+  IMAGE_NAME: idp-kwu-ac-kr
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: 'admin' 
+        password: 'qlcrkfka1#'
+
+    - name: Load environment variables
+      run: |
+        # Load VERSIONS file
+        source ./VERSIONS
+        echo "JAVA_VERSION=$JAVA_VERSION" >> $GITHUB_ENV
+        echo "JETTY_BASE_VERSION=$JETTY_BASE_VERSION" >> $GITHUB_ENV
+        
+        # Generate timestamp
+        TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+        echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+        
+        # Set image tags
+        echo "IMAGE_TAG_TIMESTAMP=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TIMESTAMP" >> $GITHUB_ENV
+        echo "IMAGE_TAG_LATEST=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
+    
+    - name: Check Shibboleth IdP installation
+      run: |
+        if [ ! -d "./shibboleth-idp" ] || [ ! -f "./shibboleth-idp/conf/idp.properties" ]; then
+          echo "WARNING: shibboleth-idp directory is missing or incomplete."
+          echo "Running install to set up the IdP..."
+          chmod +x ./install
+          ./install
+        fi
+    
+    - name: Build Docker image
+      run: |
+        echo "Building Docker image: ${{ env.IMAGE_TAG_TIMESTAMP }}"
+        docker build \
+          --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
+          --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \
+          --build-arg IDP_SCOPE=kwu.ac.kr \
+          --build-arg IDP_HOST_NAME=idp.kwu.ac.kr \
+          -t ${{ env.IMAGE_TAG_TIMESTAMP }} \
+          -t ${{ env.IMAGE_TAG_LATEST }} .
+    
+    - name: Push Docker images
+      run: |
+        echo "Pushing images to registry..."
+        docker push ${{ env.IMAGE_TAG_TIMESTAMP }}
+        docker push ${{ env.IMAGE_TAG_LATEST }}
+        
+        echo "Successfully pushed:"
+        echo "  - ${{ env.IMAGE_TAG_TIMESTAMP }}"
+        echo "  - ${{ env.IMAGE_TAG_LATEST }}"
+    
+    - name: Image scan (optional)
+      continue-on-error: true
+      run: |
+        echo "Image built and pushed successfully!"
+        echo "Image: ${{ env.IMAGE_TAG_TIMESTAMP }}"
+        echo "Latest: ${{ env.IMAGE_TAG_LATEST }}"

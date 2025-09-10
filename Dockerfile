@@ -1,62 +1,110 @@
 #
-# Shibboleth Identity Provider
+# Shibboleth Identity Provider for Kubernetes
 #
-# Builds a partial image for running the Shibboleth Identity Provider.
-#
-# This includes Java, Jetty and the Jetty configuration. At present,
-# the IdP itself and its configuration are mounted into the container.
+# 기존 Dockerfile과 유사하지만 Shibboleth IdP 설정을 이미지에 포함
 #
 
-#
-# The base Java image to use is determined by a build argument.
-# This defaults to the lowest version of Corretto supported by
-# current IdP versions, but is normally overridden by the VERSIONS
-# file via the build script.
-#
 ARG JAVA_VERSION=amazoncorretto:17
 FROM ${JAVA_VERSION}
 
-LABEL org.opencontainers.image.authors="Ian Young <ian@iay.org.uk>"
+# 필요한 패키지 설치 (tar 포함)
+RUN yum install -y tar gzip wget
 
-#
-# Jetty itself lives in JETTY_HOME.
-#
+LABEL org.opencontainers.image.authors="RYU. G.S. <narzis@gmail.com>"
+LABEL org.opencontainers.image.description="Shibboleth IdP for Kubernetes"
+
+# Jetty 설정
 ENV JETTY_HOME=/opt/jetty
-
-#
-# The Jetty base lives in JETTY_BASE, outside the Shibboleth IdP.
-#
 ENV JETTY_BASE=/opt/jetty-base
-
-#
-# A subdirectory of JETTY_BASE is used for Jetty's logs, and is
-# exposed as a volume.
-#
 ENV JETTY_LOGS=${JETTY_BASE}/logs
-VOLUME ["${JETTY_LOGS}"]
-
 ENV IDP_HOME=/opt/shibboleth-idp
 
-#
-# Add the Jetty base.
-#
+# Shibboleth 설치 관련 환경 변수 설정
+ENV DIST=/opt/shibboleth-dist
+ENV SEALPASS=changeit
+ENV TFPASS=changeit
+
+ARG IDP_SCOPE
+ARG IDP_SCOPE_DOMAIN 
+ARG IDP_HOST_NAME 
+ARG IDP_ENTITYID 
+ARG IDP_ORG_DISPLAYNAME
+# Jetty 로그 디렉토리는 볼륨으로 유지 
+VOLUME ["${JETTY_LOGS}"]
+
+# Jetty base 추가
 ARG JETTY_BASE_VERSION
 ADD jetty-base-${JETTY_BASE_VERSION} ${JETTY_BASE}
 
-#
-# Add the Jetty distribution.
-#
-ADD jetty-dist/dist  ${JETTY_HOME}
+# Jetty 배포판 추가
+ADD jetty-dist/dist ${JETTY_HOME}
 
+# 중요: Shibboleth IdP 디렉토리 복사 (볼륨으로 선언하지 않음)
+COPY shibboleth-idp/ ${IDP_HOME}/
+
+COPY overlay/shibboleth-idp-custom/ ${IDP_HOME}/
+
+# Shibboleth 배포판 복사 (설치 스크립트 포함)
+COPY fetched/shibboleth-dist/ ${DIST}/
+
+
+# REST 인증 JAR 파일 복사 및 배치
+#COPY overlay/shibboleth-idp-custom/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/edit-webapp/WEB-INF/lib/ 
+
+# 포트 노출
 EXPOSE 80 443 8443
 
-VOLUME ["${IDP_HOME}"]
-# Password 인증 모듈 활성화
-# RUN /opt/shibboleth-idp/bin/module.sh -e idp.authn.Password
-
-
-
 WORKDIR ${JETTY_BASE}
+
+RUN $DIST/bin/install.sh \
+    --targetDir $IDP_HOME \
+    --scope $IDP_SCOPE \
+    --entityID $IDP_ENTITYID \
+    --hostName $IDP_HOST_NAME \
+    --sealerPassword $SEALPASS \
+    --keystorePassword $TFPASS \
+    --noPrompt 
+    # && mkdir -p ${IDP_HOME}/dist/webapp/WEB-INF/lib/ \
+    # && cp ${IDP_HOME}/edit-webapp/WEB-INF/lib/shib-idp-rest-auth-5.1.4-jar-with-dependencies.jar ${IDP_HOME}/dist/webapp/WEB-INF/lib/
+
+RUN echo "idp.session.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.consent.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.replayCache.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.artifact.StorageService = shibboleth.DatabaseStorageService" >> ${IDP_HOME}/conf/idp.properties
+
+RUN sed -i 's/__IDP_SCOPE__/'${IDP_SCOPE}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_SCOPE_DOMAIN__/'${IDP_SCOPE_DOMAIN}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_HOST_NAME__/'${IDP_HOST_NAME}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_ORG_HOMEPAGE__/'${IDP_ORG_HOMEPAGE}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_ORG_DISPLAYNAME__/'${IDP_ORG_DISPLAYNAME}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_FORGOT_PASSWORD_URL__/'${IDP_FORGOT_PASSWORD_URL}'/' $IDP_HOME/messages/messages_ko.properties
+RUN sed -i 's/__IDP_SUPPORT_URL__/'${IDP_SUPPORT_URL}'/' $IDP_HOME/messages/messages_ko.properties
+
+# JDBC StorageService 플러그인 수동 설치
+RUN cd /tmp && \
+    curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/jdbc/2.1.0/java-plugin-jdbc-storage-2.1.0.tar.gz -o jdbc-plugin.tar.gz && \
+    mkdir -p jdbc-extract && \
+    tar -xf jdbc-plugin.tar.gz -C jdbc-extract && \
+    cd jdbc-extract && \
+    find . -type f -name "*.jar" -exec cp {} ${IDP_HOME}/edit-webapp/WEB-INF/lib/ \; && \
+    find . -path "*/conf/*" -type f -exec cp {} ${IDP_HOME}/conf/ \; && \
+    cd /tmp && \
+    rm -rf jdbc-extract jdbc-plugin.tar.gz
+
+# Nashorn 플러그인 수동 설치 - 다운로드 후 직접 파일 배치
+RUN cd /tmp && \
+    curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/scripting/2.0.0/idp-plugin-nashorn-jdk-dist-2.0.0.tar.gz -o nashorn-plugin.tar.gz && \
+    mkdir -p nashorn-extract && \
+    tar -xf nashorn-plugin.tar.gz -C nashorn-extract && \
+    cd nashorn-extract && \
+    find . -type f -name "*.jar" -exec cp {} ${IDP_HOME}/edit-webapp/WEB-INF/lib/ \; && \
+    find . -path "*/flows/*" -type d -exec cp -r {} ${IDP_HOME}/flows/ \; && \
+    find . -path "*/conf/*" -type f -exec cp {} ${IDP_HOME}/conf/ \; && \
+    cd ${IDP_HOME} && \
+    ./bin/build.sh && \
+    cd /tmp && \
+    rm -rf nashorn-extract nashorn-plugin.tar.gz
+
 # Jetty 로깅 모듈 활성화
 CMD ["java",\
     "-Djdk.tls.ephemeralDHKeySize=2048", \
@@ -65,16 +113,7 @@ CMD ["java",\
     "-Djetty.logs=/opt/jetty-base/logs",\
     "-jar", "/opt/jetty/start.jar"]
 
+# 오버레이 추가
 ADD overlay/jetty-base-${JETTY_BASE_VERSION}.tar ${JETTY_BASE}
-
-# Health check for the container.
-#
-# -f == --fail        don't show message on server failures
-# -s == --silent      don't show progress bar or error message
-#
-HEALTHCHECK --interval=1m --timeout=30s \
-    CMD curl -f -s http://127.0.0.1/idp/status || exit 1
-
-#
-# End.
-#
+RUN chmod 640 /opt/shibboleth-idp/conf/idp.properties
+RUN chmod 640 /opt/shibboleth-idp/credentials/idp-signing.key
