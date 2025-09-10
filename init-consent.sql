@@ -1,6 +1,12 @@
 -- Shibboleth IdP 5.x JDBC Storage Tables
 
-CREATE TABLE IF NOT EXISTS shibpid_context_value (
+-- Drop existing objects if they exist
+DROP INDEX IF EXISTS context_expires_idx;
+DROP INDEX IF EXISTS expires_idx;
+DROP TABLE IF EXISTS StorageRecords;
+
+-- Create fresh StorageRecords table
+CREATE TABLE StorageRecords (
     context varchar(255) NOT NULL,
     id varchar(255) NOT NULL,
     expires bigint DEFAULT NULL,
@@ -9,20 +15,10 @@ CREATE TABLE IF NOT EXISTS shibpid_context_value (
     PRIMARY KEY (context, id)
 );
 
-CREATE INDEX IF NOT EXISTS shibpid_context_value_expires_idx ON shibpid_context_value (context, expires);
-CREATE INDEX IF NOT EXISTS shibpid_context_value_version_idx ON shibpid_context_value (version);
-
--- Additional table for JDBC storage service
-CREATE TABLE IF NOT EXISTS shibpid_lock_storage (
-    context varchar(255) NOT NULL,
-    id varchar(255) NOT NULL,
-    expires bigint DEFAULT NULL,
-    PRIMARY KEY (context, id)
-);
-
-CREATE INDEX IF NOT EXISTS shibpid_lock_storage_expires_idx ON shibpid_lock_storage (expires);
+-- Create indexes
+CREATE INDEX context_expires_idx ON StorageRecords (context, expires);
+CREATE INDEX expires_idx ON StorageRecords (expires);
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON TABLE shibpid_context_value TO shibboleth;
-GRANT ALL PRIVILEGES ON TABLE shibpid_lock_storage TO shibboleth;
+GRANT ALL PRIVILEGES ON TABLE StorageRecords TO shibboleth;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO shibboleth;

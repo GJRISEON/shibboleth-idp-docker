@@ -60,7 +60,7 @@
 <bean id="shibboleth.DatabaseStorageService" parent="shibboleth.JDBCStorageService"
     p:cleanupInterval="%{idp.storage.cleanupInterval:PT10M}"
     p:dataSource-ref="shibboleth.PostgreSQLDataSource"
-    p:tableName="shibpid_context_value" />
+    />
 
 <bean id="shibboleth.PostgreSQLDataSource" 
     class="org.apache.commons.dbcp2.BasicDataSource"
