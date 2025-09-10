@@ -57,7 +57,8 @@
         <value>consent</value>
     </util:list>
 
-<bean id="shibboleth.DatabaseStorageService" parent="shibboleth.JDBCStorageService"
+<bean id="shibboleth.DatabaseStorageService" 
+    class="net.shibboleth.ext.spring.storage.JDBCStorageService"
     p:cleanupInterval="%{idp.storage.cleanupInterval:PT10M}"
     p:dataSource-ref="shibboleth.PostgreSQLDataSource"/>
 
