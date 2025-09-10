@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: registry.bitgaram.info
-  IMAGE_NAME: idp-kwu-ac-kr
+  IMAGE_REPO: idp-kwu-ac-kr
 
 jobs:
   build-and-push:
@@ -42,9 +42,9 @@ jobs:
         TIMESTAMP=$(date +"%Y%m%d%H%M%S")
         echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
         
-        # Set image tags
-        echo "IMAGE_TAG_TIMESTAMP=${REGISTRY}/${IMAGE_NAME}:$TIMESTAMP" >> $GITHUB_ENV
-        echo "IMAGE_TAG_LATEST=${REGISTRY}/${IMAGE_NAME}:latest" >> $GITHUB_ENV
+        # Set image tags using IMAGE_REPO from VERSIONS
+        echo "IMAGE_TAG_TIMESTAMP=${REGISTRY}/${IMAGE_REPO}:$TIMESTAMP" >> $GITHUB_ENV
+        echo "IMAGE_TAG_LATEST=${REGISTRY}/${IMAGE_REPO}:latest" >> $GITHUB_ENV
 
     - name: Fetch Jetty and Shibboleth components
       run: |
@@ -67,7 +67,7 @@ jobs:
       run: |
         echo "=== Environment Variables Before Build ==="
         echo "REGISTRY: ${REGISTRY}"
-        echo "IMAGE_NAME: ${IMAGE_NAME}"
+        echo "IMAGE_REPO: ${IMAGE_REPO}"
         echo "JAVA_VERSION: ${JAVA_VERSION}"
         echo "JETTY_BASE_VERSION: ${JETTY_BASE_VERSION}"
         echo "IMAGE_TAG_TIMESTAMP: ${IMAGE_TAG_TIMESTAMP}"
@@ -100,8 +100,8 @@ jobs:
         
         # Generate timestamp and image tags locally  
         TIMESTAMP=$(date +"%Y%m%d%H%M%S")
-        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_NAME}:${TIMESTAMP}"
-        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_REPO}:${TIMESTAMP}"
+        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_REPO}:latest"
         
         # Save timestamp for next step
         echo "BUILD_TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
@@ -144,9 +144,10 @@ jobs:
     - name: Push Docker images
       shell: bash
       run: |
-        # Use the timestamp from the build step
-        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_NAME}:${BUILD_TIMESTAMP}"
-        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+        # Source VERSIONS to get IMAGE_REPO and use the timestamp from the build step
+        source ./VERSIONS
+        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_REPO}:${BUILD_TIMESTAMP}"
+        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_REPO}:latest"
         
         echo "Pushing images to registry..."
         docker push "$IMAGE_TAG_TIMESTAMP"
@@ -160,8 +161,9 @@ jobs:
       continue-on-error: true
       shell: bash
       run: |
-        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_NAME}:${BUILD_TIMESTAMP}"
-        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+        source ./VERSIONS
+        IMAGE_TAG_TIMESTAMP="${REGISTRY}/${IMAGE_REPO}:${BUILD_TIMESTAMP}"
+        IMAGE_TAG_LATEST="${REGISTRY}/${IMAGE_REPO}:latest"
         
         echo "Image built and pushed successfully!"
         echo "Image: $IMAGE_TAG_TIMESTAMP"
