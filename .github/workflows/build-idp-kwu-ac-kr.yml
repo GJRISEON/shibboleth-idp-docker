@@ -45,15 +45,6 @@ jobs:
         echo "IMAGE_TAG_TIMESTAMP=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TIMESTAMP" >> $GITHUB_ENV
         echo "IMAGE_TAG_LATEST=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
     
-    - name: Check Shibboleth IdP installation
-      run: |
-        if [ ! -d "./shibboleth-idp" ] || [ ! -f "./shibboleth-idp/conf/idp.properties" ]; then
-          echo "WARNING: shibboleth-idp directory is missing or incomplete."
-          echo "Running install to set up the IdP..."
-          chmod +x ./install
-          ./install
-        fi
-    
     - name: Build Docker image
       run: |
         echo "Building Docker image: ${{ env.IMAGE_TAG_TIMESTAMP }}"
