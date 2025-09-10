@@ -55,6 +55,12 @@ jobs:
         chmod +x ./fetch-shib
         ./fetch-shib
     
+    - name: Build and prepare components
+      run: |
+        echo "Running build script to prepare overlay and components..."
+        chmod +x ./build
+        ./build
+    
     - name: Build Docker image
       run: |
         echo "Building Docker image: ${{ env.IMAGE_TAG_TIMESTAMP }}"
