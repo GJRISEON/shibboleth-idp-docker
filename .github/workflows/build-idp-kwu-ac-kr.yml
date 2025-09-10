@@ -64,6 +64,13 @@ jobs:
     - name: Build Docker image
       run: |
         echo "Building Docker image: ${{ env.IMAGE_TAG_TIMESTAMP }}"
+        echo "Build arguments:"
+        echo "  JAVA_VERSION=${{ env.JAVA_VERSION }}"
+        echo "  JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }}"
+        echo "  IDP_SCOPE=kwu.ac.kr"
+        echo "  IDP_HOST_NAME=idp.kwu.ac.kr"
+        echo "  IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth"
+        
         docker build \
           --build-arg JAVA_VERSION=${{ env.JAVA_VERSION }} \
           --build-arg JETTY_BASE_VERSION=${{ env.JETTY_BASE_VERSION }} \

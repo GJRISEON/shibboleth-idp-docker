@@ -24,11 +24,13 @@ ENV DIST=/opt/shibboleth-dist
 ENV SEALPASS=changeit
 ENV TFPASS=changeit
 
+# Build arguments
 ARG IDP_SCOPE
 ARG IDP_SCOPE_DOMAIN 
 ARG IDP_HOST_NAME 
 ARG IDP_ENTITYID 
 ARG IDP_ORG_DISPLAYNAME
+ARG JETTY_BASE_VERSION
 
 # ARG를 ENV로 설정하여 RUN 명령에서 사용 가능하게 함
 ENV IDP_SCOPE=${IDP_SCOPE}
@@ -40,7 +42,6 @@ ENV IDP_ORG_DISPLAYNAME=${IDP_ORG_DISPLAYNAME}
 VOLUME ["${JETTY_LOGS}"]
 
 # Jetty base 추가
-ARG JETTY_BASE_VERSION
 ADD jetty-base-${JETTY_BASE_VERSION} ${JETTY_BASE}
 
 # Jetty 배포판 추가
@@ -58,6 +59,15 @@ COPY fetched/shibboleth-dist/ ${DIST}/
 
 
 WORKDIR ${JETTY_BASE}
+
+# 디버그: 환경 변수 값 확인
+RUN echo "=== Environment Variables ===" && \
+    echo "IDP_SCOPE: $IDP_SCOPE" && \
+    echo "IDP_HOST_NAME: $IDP_HOST_NAME" && \
+    echo "IDP_ENTITYID: $IDP_ENTITYID" && \
+    echo "SEALPASS: $SEALPASS" && \
+    echo "TFPASS: $TFPASS" && \
+    echo "=========================="
 
 RUN $DIST/bin/install.sh \
     --targetDir $IDP_HOME \
