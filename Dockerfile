@@ -60,13 +60,8 @@ COPY fetched/shibboleth-dist/ ${DIST}/
 
 WORKDIR ${JETTY_BASE}
 
-# ARG를 다시 선언하여 확실하게 사용 가능하게 함
-ARG IDP_SCOPE
-ARG IDP_HOST_NAME 
-ARG IDP_ENTITYID
-
-# ARG를 RUN 명령에서 직접 사용
-RUN echo "=== Build Arguments ===" && \
+# ENV 값을 사용 (이미 위에서 ARG를 ENV로 변환했음)
+RUN echo "=== Environment Variables ===" && \
     echo "IDP_SCOPE: ${IDP_SCOPE}" && \
     echo "IDP_HOST_NAME: ${IDP_HOST_NAME}" && \
     echo "IDP_ENTITYID: ${IDP_ENTITYID}" && \
