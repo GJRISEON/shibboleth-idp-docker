@@ -84,8 +84,7 @@ RUN echo "=== Environment Variables ===" && \
     echo "TFPASS: ${TFPASS}" && \
     echo "========================" && \
     ${DIST}/bin/install.sh \
-    -Didp.initial.modules=idp.intercept.Consent,idp.authn.Password \
-    --propertyFile idp.install.properties \
+    -Didp.initial.modules=idp.intercept.Consent \
     --targetDir ${IDP_HOME} \
     --scope "${IDP_SCOPE}" \
     --entityID "${IDP_ENTITYID}" \
