@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <!-- Consent Intercept Configuration -->
+
+    <!-- Consent flow definition -->
+    <bean id="consent" class="net.shibboleth.idp.profile.interceptor.ProfileInterceptorFlowDescriptor"
+        p:id="consent"
+        p:applicabilityPredicate-ref="shibboleth.consent.attributeRelease.activationCondition">
+        <property name="supportedPrincipals">
+            <util:list>
+                <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                    c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport" />
+                <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                    c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:Password" />
+                <bean parent="shibboleth.SAML1AuthenticationMethod"
+                    c:method="urn:oasis:names:tc:SAML:1.0:am:password" />
+            </util:list>
+        </property>
+    </bean>
+
+    <!-- Consent activation condition -->
+    <bean id="shibboleth.consent.attributeRelease.activationCondition"
+        class="net.shibboleth.idp.consent.logic.AttributeReleaseConsentFunction" />
+
+    <!-- Consent action beans -->
+    <bean id="InitializeConsentContext"
+        class="net.shibboleth.idp.consent.impl.InitializeConsentContext"
+        scope="prototype"
+        p:storageService-ref="#{'%{idp.consent.StorageService:shibboleth.StorageService}'.trim()}"
+        p:storageKeyLookupStrategy-ref="#{'%{idp.consent.attribute-release.userStorageKey:shibboleth.consent.PrincipalConsentStorageKey}'.trim()}" />
+
+    <bean id="PopulateConsentContext"
+        class="net.shibboleth.idp.consent.impl.PopulateConsentContext"
+        scope="prototype" />
+
+    <bean id="ExtractConsent"
+        class="net.shibboleth.idp.consent.impl.ExtractConsent"
+        scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest" />
+
+    <bean id="RevokeConsent"
+        class="net.shibboleth.idp.consent.impl.RevokeConsent"
+        scope="prototype" />
+
+    <!-- Storage key lookup strategies -->
+    <bean id="shibboleth.consent.PrincipalConsentStorageKey"
+        class="net.shibboleth.idp.consent.logic.impl.PrincipalConsentStorageKeyLookupFunction"
+        p:usernameLookupStrategy-ref="shibboleth.PrincipalNameLookup.Subject" />
+
+    <bean id="shibboleth.consent.AttributeConsentStorageKey"
+        class="net.shibboleth.idp.consent.logic.impl.AttributeConsentStorageKeyLookupFunction"
+        p:usernameLookupStrategy-ref="shibboleth.PrincipalNameLookup.Subject"
+        p:attributeName="%{idp.consent.attribute-release.userStorageKeyAttribute:uid}" />
+
+</beans>
