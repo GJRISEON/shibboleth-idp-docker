@@ -14,8 +14,8 @@
     <!-- Consent Intercept Configuration -->
 
     <!-- Consent flow definition -->
-    <bean id="consent" class="net.shibboleth.idp.profile.interceptor.ProfileInterceptorFlowDescriptor"
-        p:id="consent"
+    <bean id="intercept/consent" class="net.shibboleth.idp.profile.interceptor.ProfileInterceptorFlowDescriptor"
+        p:id="intercept/consent"
         p:applicabilityPredicate-ref="shibboleth.consent.attributeRelease.activationCondition">
         <property name="supportedPrincipals">
             <util:list>
