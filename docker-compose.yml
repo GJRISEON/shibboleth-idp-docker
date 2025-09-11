@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      - idp
+    networks:
+      - idpapp
+    restart: unless-stopped
+
+  idp:
+    container_name: shibboleth-idp
+    image: ghcr.io/gjriseon/idp-kwu-ac-kr:latest
+    environment:
+      - TZ=Asia/Seoul
+      - LANG=ko_KR.UTF-8
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=shibboleth
+      - DB_USER=shibboleth
+      - DB_PASSWORD=changeme
+    # Remove external ports - nginx will handle them
+    expose:
+      - "80"
+    depends_on:
+      - rest
+      - postgres
+    networks:
+      idpapp:
+    restart: unless-stopped
+
+  rest:
+    image: registry.bitgaram.info/rest-oracle:latest  # Replace with actual rest service image
+    networks:
+      - idpapp
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=shibboleth
+      - POSTGRES_USER=shibboleth
+      - POSTGRES_PASSWORD=changeme
+      - TZ=Asia/Seoul
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-consent.sql:/docker-entrypoint-initdb.d/init-consent.sql
+    networks:
+      - idpapp
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  idpapp:
+    driver: bridge
