@@ -142,18 +142,9 @@ RUN cd /tmp && \
     cd /tmp && \
     rm -rf nashorn-extract nashorn-plugin.tar.gz
 
-# Consent 플러그인 설치
-RUN cd /tmp && \
-    curl -s -L https://shibboleth.net/downloads/identity-provider/plugins/consent/2.0.0/idp-plugin-consent-dist-2.0.0.tar.gz -o consent-plugin.tar.gz && \
-    mkdir -p consent-extract && \
-    tar -xf consent-plugin.tar.gz -C consent-extract && \
-    cd consent-extract && \
-    find . -type f -name "*.jar" -exec cp {} ${IDP_HOME}/edit-webapp/WEB-INF/lib/ \; && \
-    find . -path "*/flows/*" -type d -exec cp -r {} ${IDP_HOME}/flows/ \; && \
-    find . -path "*/conf/*" -type f -exec cp {} ${IDP_HOME}/conf/ \; && \
-    find . -path "*/views/*" -type d -exec cp -r {} ${IDP_HOME}/views/ \; && \
-    cd /tmp && \
-    rm -rf consent-extract consent-plugin.tar.gz
+# Consent 모듈 설정 추가
+RUN echo "# Consent Module Configuration" >> ${IDP_HOME}/conf/idp.properties && \
+    echo "idp.intercept.Consent = shibboleth.consent.attribute-release" >> ${IDP_HOME}/conf/idp.properties
 
 # Build IdP WAR with all plugins installed
 RUN cd ${IDP_HOME} && ./bin/build.sh

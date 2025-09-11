@@ -10,7 +10,6 @@
     default-destroy-method="destroy">
                                
     <!-- By default we look at resources whose names are derived from %{idp.home}. -->
-    <import resource="intercept/consent-intercept.xml" />
 
     <util:list id="shibboleth.RelyingPartyResolverResources">
         <value>%{idp.home}/conf/relying-party.xml</value>
