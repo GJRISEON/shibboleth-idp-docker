@@ -112,13 +112,11 @@
         <PolicyRequirementRule xsi:type="ANY" />
 
         <!-- Release common attributes -->
-        <AttributeRule attributeID="eduPersonPrincipalName" permitAny="true" />
-        <AttributeRule attributeID="mail" permitAny="true" />
         <AttributeRule attributeID="displayName" permitAny="true" />
         <AttributeRule attributeID="uid" permitAny="true" />
+        <AttributeRule attributeID="eduPersonPrincipalName" permitAny="true" />
         <AttributeRule attributeID="organizationName" permitAny="true" />
         <AttributeRule attributeID="organizationalUnitName" permitAny="true" />
-        <AttributeRule attributeID="employeeNumber" permitAny="true" />
         <AttributeRule attributeID="departmentNumber" permitAny="true" />
         <AttributeRule attributeID="eduPersonEntitlement" permitAny="true" />
         <AttributeRule attributeID="eduPersonAffiliation" permitAny="true" />
