@@ -143,7 +143,7 @@ RUN cd /tmp && \
     cd /tmp && \
     rm -rf nashorn-extract nashorn-plugin.tar.gz
 
-
+RUN cd ${IDP_HOME} && ./bin/module.sh -e idp.intercept.Consent
 # Build IdP WAR with all plugins installed
 RUN cd ${IDP_HOME} && ./bin/build.sh
 
