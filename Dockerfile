@@ -84,6 +84,7 @@ RUN echo "=== Environment Variables ===" && \
     echo "TFPASS: ${TFPASS}" && \
     echo "========================" && \
     ${DIST}/bin/install.sh \
+    -Didp.initial.modules=idp.intercept.Consent,idp.authn.Password \
     --targetDir ${IDP_HOME} \
     --scope "${IDP_SCOPE}" \
     --entityID "${IDP_ENTITYID}" \
@@ -142,9 +143,6 @@ RUN cd /tmp && \
     cd /tmp && \
     rm -rf nashorn-extract nashorn-plugin.tar.gz
 
-# Consent 모듈 설정 추가
-RUN echo "# Consent Module Configuration" >> ${IDP_HOME}/conf/idp.properties && \
-    echo "idp.intercept.Consent = shibboleth.consent.attribute-release" >> ${IDP_HOME}/conf/idp.properties
 
 # Build IdP WAR with all plugins installed
 RUN cd ${IDP_HOME} && ./bin/build.sh

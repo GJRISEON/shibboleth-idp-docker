@@ -36,7 +36,8 @@
                 <ref bean="SAML1.AttributeQuery" />
                 <ref bean="SAML1.ArtifactResolution" />
                 -->
-                <bean parent="SAML2.SSO" p:includeAttributeStatement="true" />
+                <bean parent="SAML2.SSO" p:includeAttributeStatement="true" 
+                      p:postAuthenticationFlows="#{getObject('shibboleth.consent.attribute-release.DefaultInterceptFlows')}" />
                 <ref bean="SAML2.ECP" />
                 <ref bean="SAML2.Logout" />
                 <!--
