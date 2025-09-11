@@ -104,6 +104,12 @@ RUN echo "idp.session.StorageService = shibboleth.DatabaseStorageService" >> ${I
 
 COPY overlay/shibboleth-idp-custom/ ${IDP_HOME}/
 
+# Copy forwarded proxy configuration for reverse proxy support
+COPY forwarded.ini ${JETTY_BASE}/start.d/
+
+# Configure Jetty to bind to all interfaces (required for reverse proxy)
+RUN sed -i 's/jetty.http.host=127.0.0.1/jetty.http.host=0.0.0.0/' ${JETTY_BASE}/start.d/idp.ini
+
 RUN sed -i "s#__IDP_SCOPE__#${IDP_SCOPE}#" $IDP_HOME/messages/messages_ko.properties
 RUN sed -i "s#__IDP_SCOPE_DOMAIN__#${IDP_SCOPE_DOMAIN}#" $IDP_HOME/messages/messages_ko.properties
 RUN sed -i "s#__IDP_HOST_NAME__#${IDP_HOST_NAME}#" $IDP_HOME/messages/messages_ko.properties
