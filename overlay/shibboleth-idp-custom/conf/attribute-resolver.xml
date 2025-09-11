@@ -93,39 +93,44 @@
 
         <!-- <ResultCache expireAfterWrite="PT5M"/> -->
     </DataConnector>
-    <AttributeDefinition xsi:type="Simple" id="surname" >
-	<InputDataConnector ref="rest"  attributeNames="surname"/> 
-        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:sn" encodeType="false" />
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.4" friendlyName="Surname" encodeType="false" />
-    </AttributeDefinition>
-
-    <AttributeDefinition xsi:type="Simple" id="givenName" >
-	<InputDataConnector ref="rest"  attributeNames="givenName"/> 
-        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:givenName" encodeType="false" />
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.42" friendlyName="givenName" encodeType="false" />
-    </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="displayName">
 	<InputDataConnector ref="rest"  attributeNames="displayName"/> 
         <DisplayName xml:lang="ko">표시 이름</DisplayName>
         <DisplayDescription xml:lang="ko">표시이름</DisplayDescription>
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:displayName" encodeType="false" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.16.840.1.113730.3.1.241" friendlyName="displayName" encodeType="false" />
     </AttributeDefinition>
 
     <!-- login id -->
     <AttributeDefinition xsi:type="Simple" id="uid">
 	<InputDataConnector ref="rest"  attributeNames="uid"/> 
+        <DisplayName xml:lang="ko">사용자 ID</DisplayName>
+        <DisplayDescription xml:lang="ko">로그인 사용자 ID</DisplayDescription>
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:uid" encodeType="false" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:0.9.2342.19200300.100.1.1" friendlyName="uid" encodeType="false" />
     </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="eduPersonPrincipalName">
-        <InputDataConnector ref="rest"  attributeNames="eppn"/>
+        <InputDataConnector ref="rest"  attributeNames="eduPersonPrincipalName"/>
+        <DisplayName xml:lang="ko">주체명</DisplayName>
+        <DisplayDescription xml:lang="ko">교육기관 주체 식별자</DisplayDescription>
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:eduPersonPrincipalName" encodeType="false" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.6" friendlyName="eduPersonPrincipalName" encodeType="false" />
     </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="eduPersonAffiliation">
         <InputDataConnector ref="rest"  attributeNames="eduPersonAffiliation"/>
+        <DisplayName xml:lang="ko">소속 구분</DisplayName>
+        <DisplayDescription xml:lang="ko">교육기관 내 소속 유형</DisplayDescription>
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:eduPersonAffiliation" encodeType="false" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.1" friendlyName="eduPersonAffiliation" encodeType="false" />
     </AttributeDefinition>
 
     <AttributeDefinition xsi:type="Simple" id="mail" >
 	<InputDataConnector ref="rest"  attributeNames="mail"/> 
+        <DisplayName xml:lang="ko">이메일</DisplayName>
+        <DisplayDescription xml:lang="ko">사용자 이메일 주소</DisplayDescription>
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:mail" encodeType="false" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:0.9.2342.19200300.100.1.3" friendlyName="mail" encodeType="false" />
     </AttributeDefinition>
@@ -133,6 +138,8 @@
     <!-- employeeNumber -->
     <AttributeDefinition id="employeeNumber" xsi:type="Simple">
 	<InputDataConnector ref="rest"  attributeNames="employeeNumber"/> 
+        <DisplayName xml:lang="ko">직원번호</DisplayName>
+        <DisplayDescription xml:lang="ko">사용자 직원번호</DisplayDescription>
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:employeeNumber" encodeType="false" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.16.840.1.113730.3.1.3" friendlyName="employeeNumber" encodeType="false" />
     </AttributeDefinition>
@@ -140,6 +147,8 @@
     <!-- 대학명 static -->
     <AttributeDefinition id="organizationName" xsi:type="Simple">
 	<InputDataConnector ref="rest"  attributeNames="organizationName"/> 
+        <DisplayName xml:lang="ko">대학명</DisplayName>
+        <DisplayDescription xml:lang="ko">소속 기관 이름</DisplayDescription>
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:o" encodeType="false" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.10" friendlyName="o" encodeType="false" />
     </AttributeDefinition>
@@ -147,9 +156,29 @@
     <!-- 학부 -->
   <AttributeDefinition xsi:type="Simple" id="organizationalUnitName" >
 	<InputDataConnector ref="rest" attributeNames="organizationalUnitName"/> 
+        <DisplayName xml:lang="ko">소속 학부 단과대</DisplayName>
+        <DisplayDescription xml:lang="ko">소속 학부 또는 부서명</DisplayDescription>
 	<AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:organizationalUnitName" encodeType="false" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.11" friendlyName="OU" encodeType="false" />
-  </AttributeDefinition> 
+  </AttributeDefinition>
+
+    <!-- eduPersonEntitlement -->
+    <AttributeDefinition xsi:type="Simple" id="eduPersonEntitlement">
+        <InputDataConnector ref="rest" attributeNames="eduPersonEntitlement"/>
+        <DisplayName xml:lang="ko">사용자 상태</DisplayName>
+        <DisplayDescription xml:lang="ko">사용자의 상태 및 자격</DisplayDescription>
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:eduPersonEntitlement" encodeType="false" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.7" friendlyName="eduPersonEntitlement" encodeType="false" />
+    </AttributeDefinition>
+
+    <!-- departmentNumber -->
+    <AttributeDefinition xsi:type="Simple" id="departmentNumber">
+        <InputDataConnector ref="rest" attributeNames="departmentNumber"/>
+        <DisplayName xml:lang="ko">학과</DisplayName>
+        <DisplayDescription xml:lang="ko">소속 학과</DisplayDescription>
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:departmentNumber" encodeType="false" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.16.840.1.113730.3.1.2" friendlyName="departmentNumber" encodeType="false" />
+    </AttributeDefinition> 
     <!-- 학년 
 <AttributeDefinition xsi:type="Simple" id="grade" >
 	<InputDataConnector ref="rest" attributeNames="grade" /> 
