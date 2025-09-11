@@ -1,0 +1,131 @@
+##
+## Velocity Template for DisplayAttributeReleasePage view-state
+##
+## Velocity context will contain the following properties :
+##
+## attributeReleaseContext - context holding consentable attributes
+## attributeReleaseFlowDescriptor - attribute consent flow descriptor
+## attributeDisplayNameFunction - function to display attribute name
+## attributeDisplayDescriptionFunction - function to display attribute description
+## consentContext - context representing the state of a consent flow
+## encoder - HTMLEncoder class
+## flowExecutionKey - SWF execution key (this is built into the flowExecutionUrl)
+## flowExecutionUrl - form action location
+## flowRequestContext - Spring Web Flow RequestContext
+## profileRequestContext - OpenSAML profile request context
+## request - HttpServletRequest
+## response - HttpServletResponse
+## rpUIContext - context with SP UI information from the metadata
+## environment - Spring Environment object for property resolution
+#set ($serviceName = $rpUIContext.serviceName)
+#set ($serviceDescription = $rpUIContext.serviceDescription)
+#set ($informationURL = $rpUIContext.informationURL)
+#set ($privacyStatementURL = $rpUIContext.privacyStatementURL)
+#set ($rpOrganizationLogo = $rpUIContext.getLogo())
+#set ($rpOrganizationName = $rpUIContext.organizationDisplayName)
+#set ($replaceDollarWithNewline = true)
+##
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+	    <link rel="shortcut icon" href="/idp/images/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/idp/images/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="$request.getContextPath()/css/idp-common.css">
+	    <link rel="stylesheet" href="$request.getContextPath()/css/idp-service.css">
+        <title>개인정보제공동의 과정</title>
+    </head>
+    <body>
+        <form action="$flowExecutionUrl" method="post">
+            #parse("csrf/csrf.vm")
+            <div class="box">
+                <div class="service_box">
+                    <b>전남대학교 IDP 로그인 서비스<br></b>
+                    #if ($serviceName)
+                        <span class="service_name"><span class="highlight">*</span>서비스 제공자 명칭 : $encoder.encodeForHTML($serviceName)</span>
+                    #else
+                        <span class="service_name"><span class="highlight">*</span>서비스 제공자 명칭 : www.g-riseon.or.kr</span>
+                    #end
+                    #if ($rpOrganizationName)
+                        <span class="organization_name">($encoder.encodeForHTML($rpOrganizationName))</span>
+                    #else
+                        <span class="organization_name">(서비스 제공자)</span>
+                    #end
+                </div>
+                <div class="service_cont_box">
+                    <p class="service_title">서비스 제공자(SP)에게 보낼 사용자속성 정보</p>
+                    <div id="attributeRelease">
+                        <table>
+                            <tbody>
+                                #foreach ($attribute in $attributeReleaseContext.getConsentableAttributes().values())
+                                    <tr>
+                                        <td>$encoder.encodeForHTML($attributeDisplayNameFunction.apply($attribute))</td>
+                                        <td>
+                                            #foreach ($value in $attribute.values)
+                                                #if ($replaceDollarWithNewline)
+                                                    #set ($encodedValue = $encoder.encodeForHTML($value.getDisplayValue()).replaceAll($encoder.encodeForHTML('$'),"<br>"))
+                                                #else
+                                                    #set ($encodedValue = $encoder.encodeForHTML($value.getDisplayValue()))
+                                                #end
+                                                $encodedValue<br>
+                                            #end
+                                        </td>
+                                        <td style="vertical-align: top">
+                                            <input id="$attribute.id" type="hidden" name="_shib_idp_consentIds" value="$encoder.encodeForHTML($attribute.id)" checked>
+                                        </td>
+                                    </tr>
+                                #end
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="agree_box">
+                        <p class="service_title">서비스 제공자(SP)에게 제공할 개인정보 수집 이용 동의</p>
+                        <div id="generalConsentDiv">
+                            #if ($attributeReleaseFlowDescriptor.doNotRememberConsentAllowed)
+                                <div>
+                                    <div class="input-wrap">
+                                        <input id="_shib_idp_doNotRememberConsent" type="radio" name="_shib_idp_consentOptions" value="_shib_idp_doNotRememberConsent">
+                                        <label for="_shib_idp_doNotRememberConsent">항상 확인절차 진행</label>
+                                    </div>
+                                    <ul>
+                                        <li>위 정보제공에 대해 이번만 동의합니다.</li>
+                                    </ul>
+                                </div>
+                            #end
+                            #if ($attributeReleaseFlowDescriptor.doNotRememberConsentAllowed || $attributeReleaseFlowDescriptor.globalConsentAllowed)
+                                <div>
+                                    <div class="input-wrap">
+                                        <input id="_shib_idp_rememberConsent" type="radio" name="_shib_idp_consentOptions" value="_shib_idp_rememberConsent" checked>
+                                        <label for="_shib_idp_rememberConsent">추가변경사항에만 확인절차 진행</label>
+                                    </div>
+                                    <ul>
+                                        <li>위 정보제공에 대해서만 동의합니다.</li>
+                                    </ul>
+                                </div>
+                            #end
+                            #if ($attributeReleaseFlowDescriptor.globalConsentAllowed)
+                                <div>
+                                    <div class="input-wrap">
+                                        <input id="_shib_idp_globalConsent" type="radio" name="_shib_idp_consentOptions" value="_shib_idp_globalConsent">
+                                        <label for="_shib_idp_globalConsent">확인절차없이 바로 진행</label>
+                                    </div>
+                                    <ul>
+                                        <li>정보제공과 관련하여 항상 동의합니다.</li>
+                                    </ul>
+                                </div>
+                            #end
+                        </div>
+                        #if ($attributeReleaseFlowDescriptor.doNotRememberConsentAllowed || $attributeReleaseFlowDescriptor.globalConsentAllowed)
+                            <span class="notice">이 선택은 다음에 로그인할 때 <strong>"개인정보제공방식 초기화" 옵션선택으로 </strong>변경 가능합니다.<span class="highlight">*</span></span>
+                        #end
+                    </div>
+                </div>
+                <div class="login-service-btn-wrap">
+                    <input type="submit" name="_eventId_AttributeReleaseRejected" value="거절합니다" class="disagree-btn">
+                    <input type="submit" name="_eventId_proceed" value="동의합니다" class="agree-btn">
+                </div>
+            </div>
+        </form>
+    </body>
+</html>

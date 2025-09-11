@@ -1,3 +1,4 @@
+##
 <!DOCTYPE html>
 <html lang="ko">
     <head>
@@ -415,4 +416,487 @@
         }
         </script>
     </body>
+</html>
+## Velocity Template for DisplayUsernamePasswordPage view-state
+##
+## Velocity context will contain the following properties
+## flowExecutionUrl - the form action location
+## flowRequestContext - the Spring Web Flow RequestContext
+## flowExecutionKey - the SWF execution key (this is built into the flowExecutionUrl)
+## profileRequestContext - root of context tree
+## authenticationContext - context with authentication request information
+## authenticationErrorContext - context with login error state
+## authenticationWarningContext - context with login warning state
+## ldapResponseContext - context with LDAP state (if using native LDAP)
+## rpUIContext - the context with SP UI information from the metadata
+## encoder - HTMLEncoder class
+## request - HttpServletRequest
+## response - HttpServletResponse
+## environment - Spring Environment object for property resolution
+## custom - arbitrary object injected by deployer
+##
+#set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.idp.profile.context.RelyingPartyContext'))
+#set ($username = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.UsernamePasswordContext', true).getUsername())
+##
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <title>#springMessageText("idp.title", "로그인 서비스")</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+        
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', sans-serif;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .main {
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                padding: 60px 40px 40px;
+                width: 100%;
+                max-width: 420px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+
+
+            .logo-container {
+                margin-bottom: 40px;
+            }
+
+            .main-logo {
+                max-width: 280px;
+                height: auto;
+                margin: 0 auto 40px;
+                display: block;
+                border-radius: 8px;
+                transition: transform 0.3s ease;
+            }
+
+            .main-logo:hover {
+                transform: scale(1.02);
+            }
+
+            h1 {
+                font-size: 20px;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 30px;
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+                border-radius: 10px;
+                border-left: 4px solid #e67e22;
+            }
+
+            .service-logo {
+                max-width: 60px;
+                max-height: 60px;
+                margin: 0 auto 20px;
+                display: block;
+                border-radius: 8px;
+            }
+
+            .form-section {
+                text-align: left;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+                position: relative;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #2c3e50;
+                position: relative;
+            }
+
+            input[type="text"], input[type="password"] {
+                width: 100%;
+                padding: 16px 20px;
+                border: 2px solid #ecf0f1;
+                border-radius: 12px;
+                font-size: 15px;
+                transition: all 0.3s ease;
+                outline: none;
+                background: #fafbfc;
+                color: #2c3e50;
+            }
+
+            input[type="text"]:focus, input[type="password"]:focus {
+                border-color: #e67e22;
+                box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.1);
+                background: white;
+                transform: translateY(-2px);
+            }
+
+            .checkbox-group {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin: 30px 0 35px;
+                text-align: left;
+            }
+
+            .checkbox-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 16px;
+                background: #fafbfc;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+                border: 1px solid #ecf0f1;
+            }
+
+            .checkbox-item:hover {
+                background: #f8f9fa;
+                border-color: #ddd;
+                transform: translateY(-1px);
+            }
+
+            input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                accent-color: #e67e22;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+            .checkbox-label {
+                font-size: 14px;
+                color: #2c3e50;
+                cursor: pointer;
+                margin: 0;
+                font-weight: 500;
+            }
+
+            .grid {
+                margin-bottom: 30px;
+            }
+
+            button[type="submit"] {
+                width: 100%;
+                padding: 18px;
+                background: linear-gradient(135deg, #6B46C1 0%, #553C9A 50%, #4C1D95 100%);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            button[type="submit"]::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: left 0.5s ease;
+            }
+
+            button[type="submit"]:hover {
+                background: linear-gradient(135deg, #553C9A 0%, #4C1D95 50%, #3730A3 100%);
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(107, 70, 193, 0.4);
+            }
+
+            button[type="submit"]:hover::before {
+                left: 100%;
+            }
+
+            button[type="submit"]:active {
+                transform: translateY(-1px);
+                box-shadow: 0 5px 15px rgba(107, 70, 193, 0.3);
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            ul li a {
+                color: #6B46C1;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                padding: 8px 0;
+                position: relative;
+            }
+
+            ul li a:hover {
+                color: #553C9A;
+                transform: translateX(5px);
+            }
+
+            ul li a::before {
+                content: "▸";
+                margin-right: 8px;
+                font-size: 12px;
+                transition: transform 0.3s ease;
+            }
+
+            ul li a:hover::before {
+                transform: translateX(3px);
+            }
+
+            .footer {
+                margin-top: 40px;
+                text-align: center;
+                font-size: 12px;
+                color: #95a5a6;
+                padding-top: 20px;
+                border-top: 1px solid #ecf0f1;
+            }
+
+            /* 에러 메시지 스타일링 */
+            .error-message {
+                background: linear-gradient(135deg, #fee2e2, #fecaca);
+                border-left: 4px solid #ef4444;
+                color: #991b1b;
+                padding: 16px 20px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+            }
+
+            /* 서비스 설명 스타일링 */
+            section p {
+                background: linear-gradient(135f, #f0f9ff, #e0f2fe);
+                border-left: 4px solid #0284c7;
+                color: #0c4a6e;
+                padding: 16px 20px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+                font-size: 14px;
+                text-align: left;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(2, 132, 199, 0.1);
+            }
+
+            @media (max-width: 480px) {
+                .main {
+                    padding: 40px 30px 30px;
+                    margin: 10px;
+                    border-radius: 12px;
+                }
+                
+                .main-logo {
+                    max-width: 240px;
+                }
+
+                input[type="text"], input[type="password"] {
+                    padding: 14px 16px;
+                    font-size: 14px;
+                }
+
+                button[type="submit"] {
+                    padding: 16px;
+                    font-size: 15px;
+                }
+
+                .checkbox-item {
+                    padding: 10px 12px;
+                }
+            }
+
+            /* 로딩 애니메이션 */
+            .loading {
+                opacity: 0.7;
+                pointer-events: none;
+            }
+
+            .loading button[type="submit"] {
+                background: #95a5a6;
+                cursor: not-allowed;
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+
+            .loading button[type="submit"]::after {
+                content: '';
+                width: 20px;
+                height: 20px;
+                border: 2px solid #ffffff;
+                border-top: 2px solid transparent;
+                border-radius: 50%;
+                display: inline-block;
+                animation: spin 1s linear infinite;
+                margin-left: 10px;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="main">
+            <header>
+                <!-- 광주여자대학교 로고 -->
+                <div class="logo-container">
+                    <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/kwu-logo.png")" alt="#springMessageText("idp.logo.alt-text", "광주여자대학교")" />
+                </div>
+
+                #set ($serviceName = $rpUIContext.serviceName)
+                #if ($serviceName && !$rpContext.getRelyingPartyId().contains($serviceName))
+                    <h1>#springMessageText("idp.login.loginTo", "다음 서비스에 로그인합니다") $encoder.encodeForHTML($serviceName)</h1>
+                #end
+            </header>
+
+            <section class="form-section">
+                <form action="$flowExecutionUrl" method="post" id="loginForm">
+                    #parse("csrf/csrf.vm")
+
+                    #*
+                    //    SP Description & Logo (optional)
+                    *#
+                    #set ($logo = $rpUIContext.getLogo())
+                    #if ($logo)
+                        <img class="service-logo" src="$encoder.encodeForHTMLAttribute($logo)" alt="$encoder.encodeForHTMLAttribute($serviceName)">
+                    #end
+                    #set ($desc = $rpUIContext.getServiceDescription())
+                    #if ($desc)
+                        <p>$encoder.encodeForHTML($desc)</p>
+                    #end
+
+                    #parse("login-error.vm")
+
+                    <div class="form-group">
+                        <label for="username">#springMessageText("idp.login.username", "아이디")</label>
+                        <input id="username" name="j_username" type="text" placeholder="사용자 아이디를 입력하세요"
+                            value="#if($username)$encoder.encodeForHTML($username)#end" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">#springMessageText("idp.login.password", "패스워드")</label>
+                        <input type="password" name="j_password" id="password" value="" placeholder="패스워드를 입력하세요" required />
+                    </div>
+
+                    <div class="checkbox-group">
+                        ## You may need to modify this to taste, such as changing the flow name checked to authn/MFA.
+                        #if (!$authenticationContext.getActiveResults().containsKey('authn/Password'))
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="donotcache" value="1" id="donotcache" />
+                                <label for="donotcache" class="checkbox-label">#springMessageText("idp.login.donotcache", "사용자ID 저장")</label>
+                            </div>
+                        #end
+
+                        <div class="checkbox-item">
+                            <input id="_shib_idp_revokeConsent" type="checkbox" name="_shib_idp_revokeConsent" value="true" />
+                            <label for="_shib_idp_revokeConsent" class="checkbox-label">#springMessageText("idp.attribute-release.revoke", "개인정보보호방침 동의")</label>
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="grid-item">
+                            <button type="submit" name="_eventId_proceed" id="loginButton">
+                                #springMessageText("idp.login.login", "로그인")
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <ul>
+                    <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "패스워드를 잊으셨나요?")</a></li>
+                    <li><a href="#springMessageText("idp.url.helpdesk", '#')">#springMessageText("idp.login.needHelp", "도움이 필요하세요?")</a></li>
+                </ul>
+            </section>
+
+            <footer class="footer">
+                <div class="cc">
+                    <p>#springMessageText("idp.footer", "© 2024 광주여자대학교. All rights reserved.")</p>
+                </div>
+            </footer>
+        </main>
+
+        <script>
+            // 폼 제출 시 로딩 상태 표시
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                const button = document.getElementById('loginButton');
+                const form = document.querySelector('.main');
+                
+                // 로딩 상태 활성화
+                form.classList.add('loading');
+                button.innerHTML = '#springMessageText("idp.login.pleasewait", "로그인 중입니다...")';
+            });
+
+            // 입력 필드 포커스 효과
+            document.querySelectorAll('input[type="text"], input[type="password"]').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+
+            // 체크박스 애니메이션
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const item = this.closest('.checkbox-item');
+                    if (this.checked) {
+                        item.style.background = '#f0f8ff';
+                        item.style.borderColor = '#ddd';
+                    } else {
+                        item.style.background = '#fafbfc';
+                        item.style.borderColor = '#ecf0f1';
+                    }
+                });
+            });
+
+            // 키보드 접근성
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+                    const form = document.getElementById('loginForm');
+                    const button = document.getElementById('loginButton');
+                    if (form && button) {
+                        button.click();
+                    }
+                }
+            });
+        </script>
+     </body>
 </html>
