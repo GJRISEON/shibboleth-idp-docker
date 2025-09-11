@@ -137,7 +137,7 @@ jobs:
           --build-arg "IDP_SCOPE_DOMAIN=kwu.ac.kr" \
           --build-arg "IDP_HOST_NAME=idp.kwu.ac.kr" \
           --build-arg "IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth" \
-          --build-arg "IDP_ORG_DISPLAYNAME=광주여대 \
+          --build-arg "IDP_ORG_DISPLAYNAME=광주여대" \
           --build-arg "IDP_ORG_HOMEPAGE=https://www.kw.ac.kr" \
           -t "$IMAGE_TAG_TIMESTAMP" \
           -t "$IMAGE_TAG_LATEST" .
