@@ -85,6 +85,7 @@ RUN echo "=== Environment Variables ===" && \
     echo "========================" && \
     ${DIST}/bin/install.sh \
     -Didp.initial.modules=idp.intercept.Consent,idp.authn.Password \
+    --propertyFile idp.install.properties \
     --targetDir ${IDP_HOME} \
     --scope "${IDP_SCOPE}" \
     --entityID "${IDP_ENTITYID}" \
