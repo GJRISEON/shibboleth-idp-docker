@@ -363,7 +363,7 @@
 
                 #set ($serviceName = $rpUIContext.serviceName)
                 #if ($serviceName && !$rpContext.getRelyingPartyId().contains($serviceName))
-                    <h1>#springMessageText("idp.login.loginTo", "다음 서비스에 로그인합니다") $encoder.encodeForHTML($serviceName)</h1>
+                    <h1>#springMessageText("idp.login.loginTo", "다음 서비스에 로그인합니다")</h1>
                 #end
             </header>
 

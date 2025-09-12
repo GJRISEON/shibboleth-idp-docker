@@ -1,5 +1,5 @@
 ##
-## Velocity Template for logout flow's starting view-state
+## Velocity Template for logout flow's concluding view-state (no propagation)
 ##
 ## Velocity context will contain the following properties
 ## flowExecutionUrl - the form action location
@@ -9,252 +9,126 @@
 ## logoutContext - context with SPSession details for logout operation
 ## multiRPContext - context with RelyingPartyContexts and possibly SP UI information from the metadata
 ## encoder - HTMLEncoder class
-## cspDigester - Calculates base64-encoded SHA-2 hashes (call apply)
-## cspNonce - Calculates secure nonces (call generateIdentifier)
 ## request - HttpServletRequest
 ## response - HttpServletResponse
 ## environment - Spring Environment object for property resolution
 ## custom - arbitrary object injected by deployer
 ##
-#set ($rpContext = $profileRequestContext.getSubcontext("net.shibboleth.profile.context.RelyingPartyContext"))
-#if ($rpContext)
-#set ($rpUIContext = $rpContext.getSubcontext("net.shibboleth.idp.ui.context.RelyingPartyUIContext"))
+#set ($activeIdPSessions = $logoutContext and !$logoutContext.getIdPSessions().isEmpty())
+#set ($activeSPSessions = $logoutContext and !$logoutContext.getSessionMap().isEmpty())
+#set ($regex = '(http|https):\/\/(?:.*\.)*(.+\..+?)\/')
+
+#set ($activeIdPSessions = $logoutContext and !$logoutContext.getIdPSessions().isEmpty())
+#set ($activeSPSessions = $logoutContext and !$logoutContext.getSessionMap().isEmpty())
+
+#set ($redirectUrl = 'https://www.g-riseon.or.kr') 
+
+## add sp path
+
+## Method 1: multiRPContext에서 첫 번째 RP의 entityID 사용
+#if ($multiRPContext && !$multiRPContext.getRelyingPartyContexts().isEmpty())
+    #set ($rpContext = $multiRPContext.getRelyingPartyContexts().values().iterator().next())
+    #if ($rpContext && $rpContext.getRelyingPartyId())
+        #set ($entityId = $rpContext.getRelyingPartyId())
+        ## EntityID에서 도메인 추출 (예: https://ecampus.dscu.ac.kr/saml/metadata -> https://ecampus.dscu.ac.kr)
+        #if ($entityId.startsWith("http"))
+            #set ($redirectUrl = $entityId.replaceAll("^(https?://[^/]+).*", "$1"))
+        #end
+    #end
 #end
-#set ($promptForIdP = $logoutContext and !$logoutContext.getIdPSessions().isEmpty())
-#set ($promptForSP = $logoutContext and !$logoutContext.getSessionMap().isEmpty())
-#set ($cspNonce = $cspNonce.generateIdentifier())
+
+## Method 2: logoutContext의 세션 맵에서 SP URL 추출
+#if ($activeSPSessions)
+    #foreach ($spSession in $logoutContext.getSessionMap().keySet())
+        ## SP 세션 키에서 URL 패턴 추출
+        #if ($spSession.toString().contains("://"))
+            #set ($spUrl = $spSession.toString())
+            #set ($redirectUrl = $spUrl.replaceAll("^(https?://[^/]+).*", "$1"))
+            #break
+        #end
+    #end
+#end
+
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <meta http-equiv="refresh" content="3;url=$redirectUrl">
         <title>#springMessageText("idp.title", "Web Login Service")</title>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-        <link rel="stylesheet" type="text/css" href="$request.getContextPath()#springMessageText("idp.css", "/css/placeholder.css")">
+        <link rel="stylesheet" type="text/css" href="$request.getContextPath()/css/main.css">
     </head>
 
-   <body>
-        <main class="main">
-            <header>
-                <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/placeholder-logo.png")" alt="#springMessageText("idp.logo.alt-text", "logo")" />
-            </header>
+    <body>
+    <div class="wrapper">
+      <div class="container">
+        <header>
+          <img src="$request.getContextPath()#springMessage("idp.logo")" alt="#springMessageText("idp.logo.alt-text", "logo")">
+        </header>
 
-            <section>
-            <!-- 
-                <div class="output-message">
-                    <p><strong></strong> This page is displayed when a logout operation at the Identity Provider completes.
-                    This page is an example and should be customized. It is not fully internationalized because the presentation will be a highly localized decision,
-                    and we don't have a good suggestion for a default.</p>
-                </div>
-             -->
-
-            
-            
-            #if ($promptForIdP or $promptForSP)
-              <p id="redirect-message">#springMessageText("idp.logout.prompt", "Choose one of the following, or wait a few seconds for the default.")</p>
-              <p id="countdown" style="font-weight: bold; color: #007acc;"></p>
-              <br>
-
-              <form id="propagate_form" method="POST" action="$flowExecutionUrl">
-                  <input type="hidden" name="_eventId" value="" id="eventId_input"/>
-                  <p><button id="logout_local" type="submit" name="_eventId" value="local">#springMessageText("idp.logout.idponly", "Logout Locally")</button></p>
-                  <p>#springMessageText("idp.logout.idponly.caption", "End your SSO session.")</p>
-            #end
-
-            #if ($promptForSP)
-                  <p><button id="logout_propagate" type="submit" name="_eventId" value="propagate">#springMessageText("idp.logout.global", "Logout Globally")</button></p>
-                  <p>#springMessageText("idp.logout.global.caption", "End your SSO session and attempt logout of services accessed during session.")</p>
-                  <p>#springMessageText("idp.logout.contactServices", "If instructed, the system will attempt to contact the following services:")</p>
-                  <ol>
-                  #foreach ($sp in $logoutContext.getSessionMap().keySet())
-                    #set ($rpCtx = $multiRPContext.getRelyingPartyContextById($sp))
-                    #if ($rpCtx)
-                      #set ($rpUIContext = $rpCtx.getSubcontext("net.shibboleth.idp.ui.context.RelyingPartyUIContext"))
-                    #end
-                    #if ($rpUIContext and $rpUIContext.getServiceName())
-                      <li>$encoder.encodeForHTML($rpUIContext.getServiceName())</li>
-                    #else
-                      <li>$encoder.encodeForHTML($sp)</li>
-                    #end
-                  #end
-                  </ol>
-            #end
-
-            #if ($promptForIdP)
-                  <p><button class="button--secondary" id="logout_cancel" type="submit" name="_eventId" value="end">#springMessageText("idp.logout.cancel", "Cancel")</button></p>
-                  <p>#springMessageText("idp.logout.cancel.caption", "Cancel logout and retain your SSO session.")</p>
-            #end
-            
-            #if ($promptForIdP or $promptForSP)
-              </form>
-            #else
-                <p><strong>#springMessageText("idp.logout.complete", "The logout operation is complete, and no other services appear to have been accessed during this session.")</strong></p>
-                <!-- Complete the flow by adding a hidden iframe. -->
-                <iframe style="display:none" src="$flowExecutionUrl&_eventId=proceed"></iframe>
-            #end
-
-                
-            </section>
-            
-        </main>
-        <footer class="footer">
-            <div class="cc">
-                <p>#springMessageText("idp.footer", "Insert your footer text here.")</p>
-            </div>
-        </footer>
+        <div class="content">
+         ## <div class="column one">
+          #if ($activeIdPSessions)
+            <p>#springMessageText("idp.logout.cancelled", "Logout has been cancelled.")</p>
+          #elseif ($activeSPSessions)
+            <p style="font-size: 18pt">#springMessageText("idp.logout.local", "로그아웃 완료, PC방등 공공장소에 사용 중이라면 브라우져를 닫아주세요.")</p>
+            <p style="font-size: 14pt; margin-top: 20px;">
+              <span id="countdown">3</span>초 후 메인 페이지로 이동합니다...
+            </p>
+            <p style="margin-top: 10px;">
+              <a href="$redirectUrl" style="color: #0066cc; text-decoration: underline;">지금 바로 이동하기</a>
+            </p>
+          #else
+            <p>#springMessageText("idp.logout.complete", "The logout operation is complete, and no other services appear to have been accessed during this session.")</p>
+            <p style="font-size: 14pt; margin-top: 20px;">
+              <span id="countdown">3</span>초 후 메인 페이지로 이동합니다...
+            </p>
+            <p style="margin-top: 10px;">
+              <a href="$redirectUrl" style="color: #0066cc; text-decoration: underline;">지금 바로 이동하기</a>
+            </p>
+          #end
         
-        <script nonce="$cspNonce">
-        console.log('Script started');
-        console.log('promptForIdP: $promptForIdP');
-        console.log('promptForSP: $promptForSP');
-        
-        // SP 정보 디버깅
-        #if ($logoutContext)
-            console.log('Logout context available');
-            #if ($logoutContext.getSessionMap())
-                console.log('Session map available');
-                #foreach ($sp in $logoutContext.getSessionMap().keySet())
-                    console.log('SP found: $sp');
-                    #set ($rpCtx = $multiRPContext.getRelyingPartyContextById($sp))
-                    #if ($rpCtx)
-                        console.log('RP Context found for: $sp');
-                        #set ($rpUIContext = $rpCtx.getSubcontext("net.shibboleth.idp.ui.context.RelyingPartyUIContext"))
-                        #if ($rpUIContext)
-                            console.log('RP UI Context found');
-                            #if ($rpUIContext.getServiceName())
-                                console.log('Service name: $encoder.encodeForHTML($rpUIContext.getServiceName())');
-                            #end
-                        #end
-                    #end
-                #end
-            #end
-        #end
+         ## </div>
+          #*
+          <div class="column two">
+            <ul class="list list-help">
+              <li class="list-help-item"><a href="#springMessageText("idp.url.password.reset", '#')"><span class="item-marker">&rsaquo;</span> #springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>
+              <li class="list-help-item"><a href="#springMessageText("idp.url.helpdesk", '#')"><span class="item-marker">&rsaquo;</span> #springMessageText("idp.login.needHelp", "Need Help?")</a></li>
+            </ul>
+          </div>
+          *#
+        </div>
+      </div>
 
-        // HTTP Referer 체크
-        console.log('Referer: ', document.referrer);
-        
-        // Request 정보 체크
-        #if ($request.getParameter("return"))
-            console.log('Return parameter: $request.getParameter("return")');
-        #end
-        
-        #if ($request.getHeader("Referer"))
-            console.log('HTTP Referer: $request.getHeader("Referer")');
-        #end
+      <!-- If SAML logout, complete the flow by adding a hidden iframe. -->
+      #if ( $profileRequestContext.getProfileId().contains("saml2/logout") )
+          <iframe style="display:none" src="$flowExecutionUrl&_eventId=proceed"></iframe>
+      #end
 
-        #if ($promptForIdP or $promptForSP)
-            console.log('Condition matched, starting countdown');
-            // 3초 카운트다운과 자동 리다이렉트
-            let countdownSeconds = 3;
-            const countdownElement = document.getElementById('countdown');
-            const form = document.getElementById('propagate_form');
-            const hiddenInput = document.getElementById('eventId_input');
-            
-            console.log('Elements found:', {
-                countdownElement: countdownElement,
-                form: form,
-                hiddenInput: hiddenInput
-            });
-            
-            function updateCountdown() {
-                console.log('Countdown:', countdownSeconds);
-                if (countdownSeconds > 0) {
-                    if (countdownElement) {
-                        countdownElement.textContent = countdownSeconds + '초 후 자동으로 처리됩니다...';
-                    }
-                    countdownSeconds--;
-                    setTimeout(updateCountdown, 1000);
-                } else {
-                    if (countdownElement) {
-                        countdownElement.textContent = '리다이렉트 중...';
-                    }
-                    #if ($promptForSP)
-                        console.log('Redirecting to SP logout');
-                        if (hiddenInput && form) {
-                            hiddenInput.value = 'propagate';
-                            form.submit();
-                        }
-                    #elseif ($promptForIdP)
-                        console.log('Redirecting to IdP logout');
-                        if (hiddenInput && form) {
-                            hiddenInput.value = 'local';
-                            form.submit();
-                        }
-                    #end
-                }
-            }
-            
-            // 페이지 로드 시 카운트다운 시작
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('DOM loaded, starting countdown');
-                updateCountdown();
-            });
-        #else
-            console.log('No prompt conditions met - logout already complete');
-            
-            // SP 리다이렉트 URL 결정 로직
-            let redirectUrl = null;
-            
-            // 1. RelayState 우선 (SAML 표준)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('RelayState')) {
-                redirectUrl = urlParams.get('RelayState');
-                console.log('Using RelayState:', redirectUrl);
-            }
-            
-            // 2. Return 파라미터
-            #if ($request.getParameter("return"))
-                if (!redirectUrl) {
-                    redirectUrl = '$request.getParameter("return")';
-                    console.log('Using return parameter:', redirectUrl);
-                }
-            #end
-            
-            // 3. HTTP Referer (가장 일반적)
-            if (!redirectUrl && document.referrer && 
-                document.referrer !== window.location.href &&
-                !document.referrer.includes('idp.g-riseon.or.kr')) {
-                redirectUrl = document.referrer;
-                console.log('Using document.referrer:', redirectUrl);
-            }
-            
-            // 4. 기본값
-            if (!redirectUrl) {
-                redirectUrl = 'https://www.g-riseon.or.kr'; // 실제 SP 도메인으로 변경
-                console.log('Using default URL:', redirectUrl);
-            }
-            
-            let countdownSeconds = 3;
-            
-            // 카운트다운 표시를 위한 요소 생성
-            const messageElement = document.querySelector('section p strong');
-            if (messageElement) {
-                const countdownDiv = document.createElement('div');
-                countdownDiv.id = 'auto-redirect';
-                countdownDiv.style.cssText = 'margin-top: 20px; padding: 10px; background-color: #e7f3ff; border-radius: 5px; text-align: center;';
-                messageElement.parentNode.appendChild(countdownDiv);
-                
-                function updateCountdown() {
-                    console.log('Auto redirect countdown:', countdownSeconds);
-                    if (countdownSeconds > 0) {
-                        countdownDiv.innerHTML = '<p style="margin: 0; font-weight: bold; color: #007acc;">' + 
-                                                countdownSeconds + '초 후 자동으로 원래 페이지로 이동합니다...</p>';
-                        countdownSeconds--;
-                        setTimeout(updateCountdown, 1000);
-                    } else {
-                        countdownDiv.innerHTML = '<p style="margin: 0; font-weight: bold; color: #007acc;">리다이렉트 중...</p>';
-                        console.log('Redirecting to:', redirectUrl);
-                        window.location.href = redirectUrl;
-                    }
-                }
-                
-                // 페이지 로드 시 카운트다운 시작
-                document.addEventListener('DOMContentLoaded', function() {
-                    console.log('DOM loaded, starting auto redirect countdown');
-                    updateCountdown();
-                });
-            }
-        #end
-        </script>
-    </body>
+      <footer>
+        <div class="container container-footer">
+          <p class="footer-text">#springMessageText("idp.footer", "Insert your footer text here.")</p>
+        </div>
+      </footer>
+    </div>
+    
+    <script>
+      // 카운트다운 기능
+      let countdown = 3;
+      const countdownElement = document.getElementById('countdown');
+      
+      if (countdownElement) {
+        const timer = setInterval(function() {
+          countdown--;
+          countdownElement.textContent = countdown;
+          
+          if (countdown <= 0) {
+            clearInterval(timer);
+            window.location.href = '$redirectUrl';
+          }
+        }, 1000);
+      }
+    </script>
+    
+     </body>
 </html>

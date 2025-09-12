@@ -41,7 +41,7 @@
             #parse("csrf/csrf.vm")
             <div class="box">
                 <div class="service_box">
-                    <b>전남대학교 IDP 로그인 서비스<br></b>
+                    <b>$rpOrganizationName IdP 로그인 서비스<br></b>
                     #if ($serviceName)
                         <span class="service_name"><span class="highlight">*</span>서비스 제공자 명칭 : $encoder.encodeForHTML($serviceName)</span>
                     #else
