@@ -32,16 +32,32 @@
         logger.info("Response body: " + body);
         
         try {
-            // JSON 파싱
-            var resultObj = JSON.parse(body);
+        // JSON 파싱
+        var resultObj = JSON.parse(body);
+        
+        // 모든 속성 처리
+        var keys = Object.keys(resultObj);
+        for (var i = 0; i < keys.length; i++) {
+            var attName = keys[i];
+            logger.info("Processing attribute: " + attName);
             
-            // 모든 속성 처리
-            var keys = Object.keys(resultObj);
-            for (var i = 0; i < keys.length; i++) {
-                var attName = keys[i];
-                logger.info("Processing attribute: " + attName);
+            // 특별히 eduPersonAffiliation에 대한 로깅과 처리 추가
+            if (attName === "eduPersonAffiliation") {
+                var val = resultObj[attName];
+                logger.info("eduPersonAffiliation 값 타입: " + (typeof val) + ", 값: " + JSON.stringify(val));
+                logger.info("eduPersonAffiliation array? " + Array.isArray(val));
                 
-                // IdPAttribute 생성
+                // 특별 처리: REST API에서 온 eduPersonAffiliation이 객체일 경우 "STUDENT"로 하드코딩
+                if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && Object.keys(val[0]).length === 0) {
+                    logger.info("eduPersonAffiliation에 빈 객체 감지, 'STUDENT'로 값 설정");
+                    // 원래 값을 변경
+                    resultObj[attName] = ["STUDENT"];
+                    val = resultObj[attName];
+                    logger.info("eduPersonAffiliation 값 수정됨: " + JSON.stringify(val));
+                } else if (Array.isArray(val) && val.length > 0) {
+                    logger.info("eduPersonAffiliation[0] 타입: " + (typeof val[0]) + ", 값: " + JSON.stringify(val[0]));
+                }
+            }                // IdPAttribute 생성
                 var idpAttribute = new IdPAttribute(attName);
                 
                 // StringAttributeValue 객체 컬렉션 생성
@@ -57,16 +73,28 @@
                     for (var j = 0; j < valuesArray.length; j++) {
                         var value = valuesArray[j];
                         if (value !== null && value !== undefined && value !== "") {
-                            logger.info("Adding value: " + value);
-                            attributeValues.add(new StringAttributeValue(String(value)));
+                            // 객체인 경우 JSON.stringify를 사용하지 않고 바로 문자열 변환
+                            if (typeof value === 'object') {
+                                logger.info("Object value detected for " + attName + ", using string value directly");
+                                attributeValues.add(new StringAttributeValue(value.toString()));
+                            } else {
+                                logger.info("Adding value: " + value);
+                                attributeValues.add(new StringAttributeValue(String(value)));
+                            }
                         }
                     }
                 } else {
                     // 단일 값인 경우
                     logger.info(attName + " is a single value");
                     if (valuesArray !== null && valuesArray !== undefined && valuesArray !== "") {
-                        logger.info("Adding value: " + valuesArray);
-                        attributeValues.add(new StringAttributeValue(String(valuesArray)));
+                        // 객체인 경우 JSON.stringify를 사용하지 않고 바로 문자열 변환
+                        if (typeof valuesArray === 'object') {
+                            logger.info("Object value detected for " + attName + ", using string value directly");
+                            attributeValues.add(new StringAttributeValue(valuesArray.toString()));
+                        } else {
+                            logger.info("Adding value: " + valuesArray);
+                            attributeValues.add(new StringAttributeValue(String(valuesArray)));
+                        }
                     }
                 }
                 

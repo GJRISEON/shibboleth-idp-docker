@@ -1,5 +1,4 @@
-version: '3.8'
-
+version: "3.1"
 services:
   nginx:
     image: nginx:alpine
@@ -9,40 +8,15 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/ssl/certs:ro
+
     depends_on:
       - idp
     networks:
       - idpapp
     restart: unless-stopped
 
-  idp:
-    container_name: shibboleth-idp
-    image: ghcr.io/gjriseon/idp-kwu-ac-kr:latest
-    environment:
-      - TZ=Asia/Seoul
-      - LANG=ko_KR.UTF-8
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=shibboleth
-      - DB_USER=shibboleth
-      - DB_PASSWORD=changeme
-    # Remove external ports - nginx will handle them
-    expose:
-      - "80"
-    depends_on:
-      - rest
-      - postgres
-    networks:
-      idpapp:
-    restart: unless-stopped
-
-  rest:
-    image: registry.bitgaram.info/rest-oracle:latest  # Replace with actual rest service image
-    networks:
-      - idpapp
-    restart: unless-stopped
-
   postgres:
+    restart: unless-stopped
     image: postgres:15
     environment:
       - POSTGRES_DB=shibboleth
@@ -53,14 +27,194 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-consent.sql:/docker-entrypoint-initdb.d/init-consent.sql
     networks:
-      - idpapp
+      idpapp:
+        aliases:
+          - postgres
     ports:
       - "5432:5432"
-    restart: unless-stopped
+                    
+    networks:
+      idpapp:
+        aliases:
+          - postgres
 
+  rest:
+    container_name: iugj_rest
+    image: docker.iugj.ac.kr/rest-oracle:latest
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - TZ=Asia/Seoul
+    - LANG=ko_KR.UTF-8
+    - DB_USER=KWUOS
+    # - PASSWORD=/run/secrets/PASSWORD for HA config
+    - DB_PASSWORD
+    - SERVICE=kwudb
+    - HOST=210.125.130.8
+    - DB_PORT=1521
+    - DB_TYPE=oracle
+    - AUTH_QUERY=SELECT * FROM KWUOS.BV_KWUDB WHERE ID = :USERID AND PASSWORD=CDDB.SHA256HASH(:PASSWORD)
+    - ATTRIBUTE_QUERY=SELECT NAME AS "displayName",SABUN AS "employeeNumber",  SABUN AS "uid", '광주여자대학교' AS "organizationName", DECODE(GUBUN,'11','student','1','faculty', '2','faculty') AS "eduPersonAffiliation", GWA_NM AS "departmentNumber", SABUN AS "eduPersonPrincipalName" FROM KWUOS.BV_KWUDB WHERE ID = :USERID
+    # secrets:
+      # DB_PASSWORD
+    ports:
+    - 4000:4000 
+    networks:
+      idpapp:
+
+  idp:
+    image: ghcr.io/gjriseon/idp-kwu-ac-kr:latest
+    environment:
+     - TZ=Asia/Seoul
+     - LANG=ko_KR.UTF-8
+    depends_on:
+    - rest
+    - postgres
+
+    networks:
+      idpapp:
+
+    # secrets: #for HA
+    # - DB_PASSWORD
+    # - REALM
+    # volumes:
+      # - ./logs:/opt/shib-jetty-base/logs
+    # deploy:
+    #     mode: replicated
+    #     replicas: 2
+    #     
+  blackbox_exporter:
+    image: prom/blackbox-exporter
+    container_name: monitoring_blackbox_exporter
+    dns: 8.8.8.8
+    restart: always
+    expose:
+      - 9115
+    volumes:
+      - "./data/blackbox-exporter/config:/config"
+    command: --config.file=/config/blackbox.yml    
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: monitoring_node_exporter
+    restart: unless-stopped
+    expose:
+      - 9100
+    ports:
+      - 9100:9100
+
+  cadvisor:
+    privileged: true
+    image: google/cadvisor:latest
+    container_name: monitoring_cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+
+  saml-metadata-exporter:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    image: docker.iugj.ac.kr/saml-metadata-exporter
+    #build:
+    #  context: .
+    ports:
+      - 9500:80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - REGISTRY_METADATA_URL=https://registry.iugj.ac.kr/rr3/metadata/federation/iu-gj/IDP/metadata.xml
+      - LOCAL_METADATA_URL=https://idp.kwu.ac.kr/idp/shibboleth
+      - CHECK_INTERVAL=5
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=30
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_DEBUG=false
+      - TZ=Asia/Seoul
+      - WATCHTOWER_LABEL_ENABLE=true
+      - REPO_USER=docker
+      - REPO_PASS=qlcrkfka1!
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  docker_state_exporter:
+    image: karugaru/docker_state_exporter
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    ports:
+      - "9323:8080"
+  alertmanager_telegram:
+    image: janwh/alertmanager-telegram
+#    build:
+#     context: ./alertmanager-telegram
+    container_name: monitoring_alertmanager-telegram
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_CHAT_ID=-640180967
+      - TELEGRAM_TOKEN=5197115862:AAFfRyRW0ROpQXHWnIQrvybO3zWy4yhXocQ
+    expose:
+      - 8080
+    volumes:
+      - ./data/alertmanager-telegram/config/template.html:/templates/default.html
+
+  prometheus:
+    image: prom/prometheus:latest
+    user: 1000:1000
+    container_name: monitoring_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./data/prometheus/config:/etc/prometheus/
+      - ./data/prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    links:
+      - alertmanager:alertmanager
+    depends_on:
+    - alertmanager
+
+  alertmanager:
+    image: quay.io/prometheus/alertmanager
+    container_name: monitoring_alertmanager
+    ports:
+      - 9093:9093
+    volumes:
+      - ./data/alertmanager/config:/etc/alertmanager/
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    links:
+            #      - prometheus_telegram_bot:prometheus_telegram_bot
+      - alertmanager_telegram:alertmanager_telegram
+    depends_on:
+    - alertmanager_telegram
+      
 volumes:
-  postgres_data:
+   postgres_data:
 
 networks:
-  idpapp:
-    driver: bridge
+   idpapp:
+
