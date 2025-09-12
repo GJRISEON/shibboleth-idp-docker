@@ -129,43 +129,6 @@ services:
     ports:
       - 8080:8080
 
-  saml-metadata-exporter:
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-    image: docker.iugj.ac.kr/saml-metadata-exporter
-    #build:
-    #  context: .
-    ports:
-      - 9500:80
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
-      - REGISTRY_METADATA_URL=https://registry.iugj.ac.kr/rr3/metadata/federation/iu-gj/IDP/metadata.xml
-      - LOCAL_METADATA_URL=https://idp.kwu.ac.kr/idp/shibboleth
-      - CHECK_INTERVAL=5
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WATCHTOWER_POLL_INTERVAL=30
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_DEBUG=false
-      - TZ=Asia/Seoul
-      - WATCHTOWER_LABEL_ENABLE=true
-      - REPO_USER=docker
-      - REPO_PASS=qlcrkfka1!
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-
   docker_state_exporter:
     image: karugaru/docker_state_exporter
     volumes:
@@ -174,6 +137,7 @@ services:
         target: /var/run/docker.sock
     ports:
       - "9323:8080"
+
   alertmanager_telegram:
     image: janwh/alertmanager-telegram
 #    build:
