@@ -1,12 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Console appender for development -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <!-- Audit log appender - specifically for authentication events -->
+    <appender name="IDP_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${idp.home}/logs/idp-audit.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.home}/logs/idp-audit-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <!-- Raw audit log format for structured parsing by Promtail -->
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Process log appender - general IdP processing -->
+    <appender name="IDP_PROCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${idp.home}/logs/idp-process.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.home}/logs/idp-process-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Warning log appender - errors and warnings only -->
+    <appender name="IDP_WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${idp.home}/logs/idp-warn.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.home}/logs/idp-warn-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>200MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <!-- Specific logger for Shibboleth audit events -->
+    <logger name="Shibboleth-Audit" level="ALL" additivity="false">
+        <appender-ref ref="IDP_AUDIT"/>
+    </logger>
+
+    <!-- Authentication flow loggers -->
+    <logger name="net.shibboleth.idp.authn" level="INFO" additivity="false">
+        <appender-ref ref="IDP_PROCESS"/>
+        <appender-ref ref="IDP_WARN"/>
+    </logger>
+
+    <!-- SAML protocol loggers -->
+    <logger name="net.shibboleth.idp.saml" level="INFO" additivity="false">
+        <appender-ref ref="IDP_PROCESS"/>
+        <appender-ref ref="IDP_WARN"/>
+    </logger>
+
+    <!-- Session management -->
+    <logger name="net.shibboleth.idp.session" level="INFO" additivity="false">
+        <appender-ref ref="IDP_PROCESS"/>
+        <appender-ref ref="IDP_WARN"/>
+    </logger>
+
+    <!-- Root logger -->
+    <root level="INFO">
         <appender-ref ref="CONSOLE" />
+        <appender-ref ref="IDP_PROCESS" />
+        <appender-ref ref="IDP_WARN" />
     </root>
 </configuration>

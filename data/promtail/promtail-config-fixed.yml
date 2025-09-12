@@ -1,0 +1,145 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Shibboleth IdP Audit Log Collection - ACTUAL FORMAT
+  - job_name: shibboleth-audit
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: shibboleth-audit
+          service: shibboleth-idp
+          type: audit
+          environment: production
+          organization: kwu
+          __path__: /var/log/shibboleth/idp-audit.log
+    
+    pipeline_stages:
+      # Parse ACTUAL Shibboleth audit log format (20 pipe-delimited fields)
+      # Format: client_ip|start_time|end_time|request_id|relying_party|session_id|auth_method|auth_time|attributes|assertion|subject_type|encrypt|sign|encryption_method|binding|response_location|error|status|message_id|user_agent
+      - regex:
+          expression: '^(?P<client_address>[^|]*)\|(?P<start_time>[^|]*)\|(?P<end_time>[^|]*)\|(?P<request_id>[^|]*)\|(?P<relying_party>[^|]*)\|(?P<session_id>[^|]*)\|(?P<auth_method>[^|]*)\|(?P<auth_time>[^|]*)\|(?P<attributes>[^|]*)\|(?P<assertion>[^|]*)\|(?P<subject_type>[^|]*)\|(?P<encrypt>[^|]*)\|(?P<sign>[^|]*)\|(?P<encryption_method>[^|]*)\|(?P<binding>[^|]*)\|(?P<response_location>[^|]*)\|(?P<error>[^|]*)\|(?P<status>[^|]*)\|(?P<message_id>[^|]*)\|(?P<user_agent>.*)'
+      
+      # Extract principal/username from attributes field (uid or eduPersonPrincipalName)
+      - regex:
+          source: attributes
+          expression: '(?:^|,)uid(?:,|$)'
+          target: has_uid
+      
+      # Extract username from request_id (appears to be the user ID)
+      - template:
+          source: principal
+          template: '{{ .request_id }}'
+
+      # Create labels for efficient filtering and grouping
+      - labels:
+          relying_party:
+          principal:
+          auth_method:
+          status:
+          client_address:
+          subject_type:
+          binding:
+      
+      # Parse timestamp (use end_time as the primary timestamp)
+      - timestamp:
+          source: end_time
+          format: "2006-01-02T15:04:05.000000000Z"
+          fallback_formats:
+            - "2006-01-02T15:04:05.000000Z"
+            - "2006-01-02T15:04:05Z"
+      
+      # Create a structured message for readability
+      - template:
+          source: structured_message
+          template: 'Authentication: user={{ .principal }} from={{ .client_address }} to={{ .relying_party }} method={{ .auth_method }} status={{ .status }}'
+      
+      # Classify success/failure based on status and error fields
+      - match:
+          selector: '{status=~"(?i)(success|Success)"}'
+          stages:
+            - labels:
+                result: success
+        
+      - match:
+          selector: '{error!=""}'
+          stages:
+            - labels:
+                result: failure
+                
+      - match:
+          selector: '{status=~"(?i)(fail|error|denied|Fail|Error)"}'
+          stages:
+            - labels:
+                result: failure
+                
+      # Default to success if status is empty and no error (most successful auths)
+      - match:
+          selector: '{status="", error=""}'
+          stages:
+            - labels:
+                result: success
+
+  # Shibboleth IdP Process Log (for operational monitoring)
+  - job_name: shibboleth-process
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: shibboleth-process
+          service: shibboleth-idp
+          type: process
+          environment: production
+          __path__: /var/log/shibboleth/idp-process.log
+    
+    pipeline_stages:
+      # Parse standard Java log format
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<logger>[\w\.]+) - (?P<message>.*)'
+      
+      - labels:
+          level:
+          
+      # Filter out DEBUG and TRACE to reduce volume
+      - match:
+          selector: '{level=~"DEBUG|TRACE"}'
+          action: drop
+          
+      # Timestamp parsing
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05"
+
+  # Shibboleth IdP Warning Log (for error tracking)
+  - job_name: shibboleth-warn
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: shibboleth-warn
+          service: shibboleth-idp
+          type: warning
+          environment: production
+          severity: high
+          __path__: /var/log/shibboleth/idp-warn.log
+    
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<logger>[\w\.]+) - (?P<message>.*)'
+      
+      - labels:
+          level:
+          logger:
+          
+      # Timestamp parsing
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05"
