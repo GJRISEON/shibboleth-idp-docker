@@ -24,7 +24,7 @@
   "id": null,
   "links": [],
   "liveNow": false,
-  "title": "Shibboleth IdP - 광주여대 로그 분석",
+  "title": "Shibboleth IdP - 호남대 로그 분석",
   "tags": ["shibboleth", "authentication", "audit", "loki"],
   "panels": [
     {

@@ -12,7 +12,7 @@
 ```
 Name: Shibboleth-Loki
 Type: Loki
-URL: https://idp.kwu.ac.kr/loki-api
+URL: https://idp.honam.ac.kr/loki-api
 ```
 
 #### B. HTTP 설정 (중요!)
@@ -64,8 +64,8 @@ grafana:
 docker exec -it <grafana_container> /bin/bash
 
 # 내부에서 Loki 접근 테스트
-curl -k "https://idp.kwu.ac.kr/loki-api/ready"
-curl -k "https://idp.kwu.ac.kr/loki-api/loki/api/v1/labels"
+curl -k "https://idp.honam.ac.kr/loki-api/ready"
+curl -k "https://idp.honam.ac.kr/loki-api/loki/api/v1/labels"
 ```
 
 ### 5. 대안 설정 (로컬 접근)
@@ -134,7 +134,7 @@ loki:
 ```
 Grafana 데이터소스:
 ```
-URL: http://idp.kwu.ac.kr:3100
+URL: http://idp.honam.ac.kr:3100
 ```
 
 ## 📞 디버깅 명령어
@@ -147,7 +147,7 @@ docker logs <grafana_container> --tail 50
 docker-compose logs -f nginx
 
 # 3. Loki 상태 확인
-curl -k "https://idp.kwu.ac.kr/loki-api/ready"
+curl -k "https://idp.honam.ac.kr/loki-api/ready"
 
 # 4. 네트워크 연결 확인
 docker network ls

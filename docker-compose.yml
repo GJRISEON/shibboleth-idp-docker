@@ -67,13 +67,13 @@ services:
       args:
         - JAVA_VERSION=amazoncorretto:21
         - JETTY_BASE_VERSION=12.0
-        - IDP_SCOPE=kwu.ac.kr
-        - IDP_SCOPE_DOMAIN=kwu.ac.kr
-        - IDP_HOST_NAME=idp.kwu.ac.kr
-        - IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth
-        - IDP_ORG_DISPLAYNAME=광주여대
+        - IDP_SCOPE=honam.ac.kr
+        - IDP_SCOPE_DOMAIN=honam.ac.kr
+        - IDP_HOST_NAME=idp.honam.ac.kr
+        - IDP_ENTITYID=https://idp.honam.ac.kr/idp/shibboleth
+        - IDP_ORG_DISPLAYNAME=호남대
         - IDP_ORG_HOMEPAGE=https://www.kw.ac.kr
-    image: ghcr.io/gjriseon/idp-kwu-ac-kr:latest
+    image: ghcr.io/gjriseon/idp-honam-ac-kr:latest
 
     environment:
      - TZ=Asia/Seoul

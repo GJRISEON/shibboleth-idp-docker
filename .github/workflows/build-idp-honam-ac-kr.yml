@@ -3,14 +3,14 @@ name: Build and Push IdP KWU AC KR
 on:
   push:
     branches:
-      - idp-kwu-ac-kr
+      - idp-honam-ac-kr
   pull_request:
     branches:
-      - idp-kwu-ac-kr
+      - idp-honam-ac-kr
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_REPO: gjriseon/idp-kwu-ac-kr
+  IMAGE_REPO: gjriseon/idp-honam-ac-kr
 
 jobs:
   build-and-push:
@@ -83,10 +83,10 @@ jobs:
         echo "=== Build Arguments to be passed ==="
         echo "JAVA_VERSION: ${JAVA_VERSION}"
         echo "JETTY_BASE_VERSION: ${JETTY_BASE_VERSION}"
-        echo "IDP_SCOPE: kwu.ac.kr"
-        echo "IDP_SCOPE_DOMAIN: kwu.ac.kr"
-        echo "IDP_HOST_NAME: idp.kwu.ac.kr"
-        echo "IDP_ENTITYID: https://idp.kwu.ac.kr/idp/shibboleth"
+        echo "IDP_SCOPE: honam.ac.kr"
+        echo "IDP_SCOPE_DOMAIN: honam.ac.kr"
+        echo "IDP_HOST_NAME: idp.honam.ac.kr"
+        echo "IDP_ENTITYID: https://idp.honam.ac.kr/idp/shibboleth"
         echo "IDP_ORG_DISPLAYNAME: Kwangwoon University"
         echo "IDP_ORG_HOMEPAGE: https://www.kw.ac.kr"
         echo "========================="
@@ -119,10 +119,10 @@ jobs:
         echo "  --no-cache \\"
         echo "  --build-arg \"JAVA_VERSION=$JAVA_VERSION\" \\"
         echo "  --build-arg \"JETTY_BASE_VERSION=$JETTY_BASE_VERSION\" \\"
-        echo "  --build-arg \"IDP_SCOPE=kwu.ac.kr\" \\"
-        echo "  --build-arg \"IDP_SCOPE_DOMAIN=kwu.ac.kr\" \\"
-        echo "  --build-arg \"IDP_HOST_NAME=idp.kwu.ac.kr\" \\"
-        echo "  --build-arg \"IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth\" \\"
+        echo "  --build-arg \"IDP_SCOPE=honam.ac.kr\" \\"
+        echo "  --build-arg \"IDP_SCOPE_DOMAIN=honam.ac.kr\" \\"
+        echo "  --build-arg \"IDP_HOST_NAME=idp.honam.ac.kr\" \\"
+        echo "  --build-arg \"IDP_ENTITYID=https://idp.honam.ac.kr/idp/shibboleth\" \\"
         echo "  --build-arg \"IDP_ORG_DISPLAYNAME=Kwangwoon University\" \\"
         echo "  --build-arg \"IDP_ORG_HOMEPAGE=https://www.kw.ac.kr\" \\"
         echo "  -t \"$IMAGE_TAG_TIMESTAMP\" \\"
@@ -133,11 +133,11 @@ jobs:
           --no-cache \
           --build-arg "JAVA_VERSION=$JAVA_VERSION" \
           --build-arg "JETTY_BASE_VERSION=$JETTY_BASE_VERSION" \
-          --build-arg "IDP_SCOPE=kwu.ac.kr" \
-          --build-arg "IDP_SCOPE_DOMAIN=kwu.ac.kr" \
-          --build-arg "IDP_HOST_NAME=idp.kwu.ac.kr" \
-          --build-arg "IDP_ENTITYID=https://idp.kwu.ac.kr/idp/shibboleth" \
-          --build-arg "IDP_ORG_DISPLAYNAME=광주여대" \
+          --build-arg "IDP_SCOPE=honam.ac.kr" \
+          --build-arg "IDP_SCOPE_DOMAIN=honam.ac.kr" \
+          --build-arg "IDP_HOST_NAME=idp.honam.ac.kr" \
+          --build-arg "IDP_ENTITYID=https://idp.honam.ac.kr/idp/shibboleth" \
+          --build-arg "IDP_ORG_DISPLAYNAME=호남대" \
           --build-arg "IDP_ORG_HOMEPAGE=https://www.kw.ac.kr" \
           -t "$IMAGE_TAG_TIMESTAMP" \
           -t "$IMAGE_TAG_LATEST" .

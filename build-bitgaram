@@ -9,7 +9,7 @@
 TIMESTAMP=$(date +"%Y%m%d%H%M%S")
 
 # 이미지 태그 설정
-K8S_IMAGE_NAME="ghcr.io/gjriseon/idp-kwu-ac-kr"
+K8S_IMAGE_NAME="ghcr.io/gjriseon/idp-honam-ac-kr"
 K8S_IMAGE_WITH_TAG="${K8S_IMAGE_NAME}:${TIMESTAMP}"
 
 # 먼저 Shibboleth IdP 설치 확인

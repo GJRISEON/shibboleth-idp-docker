@@ -19,7 +19,7 @@ scrape_configs:
           service: shibboleth-idp
           type: audit
           environment: production
-          organization: kwu
+          organization: honam
           __path__: /var/log/shibboleth/idp-audit.log
     
     pipeline_stages:

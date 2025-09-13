@@ -358,7 +358,7 @@
             <header>
                 <!-- 광주여자대학교 로고 -->
                 <div class="logo-container">
-                    <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/kwu-logo.png")" alt="#springMessageText("idp.logo.alt-text", "광주여자대학교")" />
+                    <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/honam-logo.png")" alt="#springMessageText("idp.logo.alt-text", "광주여자대학교")" />
                 </div>
 
                 #set ($serviceName = $rpUIContext.serviceName)

@@ -3,7 +3,7 @@
 ## 🔗 Loki 데이터소스 추가
 
 ### 1. Grafana 접속
-- URL: `https://idp.kwu.ac.kr:443` (Grafana가 설치된 경우)
+- URL: `https://idp.honam.ac.kr:443` (Grafana가 설치된 경우)
 - 또는 별도 Grafana 서버에서 접근
 
 ### 2. Loki 데이터소스 설정
@@ -14,7 +14,7 @@
 
 ```
 Name: Shibboleth-Loki
-URL: https://idp.kwu.ac.kr/loki-api
+URL: https://idp.honam.ac.kr/loki-api
 ```
 
 ### 3. 고급 설정 (선택사항)
@@ -104,7 +104,7 @@ sum(rate({job="shibboleth-audit"}[5m])) * 300
 
 ### Grafana 모바일 앱
 - iOS/Android Grafana 앱 설치
-- 서버 URL: `https://idp.kwu.ac.kr`
+- 서버 URL: `https://idp.honam.ac.kr`
 - 로그인 후 대시보드 확인
 
 ## 🔧 성능 최적화
@@ -129,11 +129,11 @@ sum(rate({job="shibboleth-audit"}[5m])) * 300
 
 ```bash
 # Loki API (직접 접근)
-https://idp.kwu.ac.kr/loki-api/ready
-https://idp.kwu.ac.kr/loki-api/loki/api/v1/query
+https://idp.honam.ac.kr/loki-api/ready
+https://idp.honam.ac.kr/loki-api/loki/api/v1/query
 
 # Grafana에서 사용할 데이터소스 URL
-https://idp.kwu.ac.kr/loki-api
+https://idp.honam.ac.kr/loki-api
 ```
 
 ## 🔒 보안 고려사항
